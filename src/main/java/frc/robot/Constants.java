@@ -16,129 +16,12 @@ import edu.wpi.first.units.measure.LinearVelocity;
 public final class Constants {
 
   public static final SparkBaseConfig kBrakeConfig = new SparkMaxConfig().idleMode(IdleMode.kBrake);
+  public static final SparkBaseConfig kCoastConfig = new SparkMaxConfig().idleMode(IdleMode.kCoast);
   public static final SparkBaseConfig kBrakeInvertedConfig = new SparkMaxConfig().idleMode(IdleMode.kBrake).inverted(true);
 
   static final double ratio = 1.0;
 
-  public static final class OpConstantsForBall {
-    public static final double Ball1Lift = 0.3 * ratio; //GROUND BALL
-    public static final double Ball1Pivot = 0.05;
-
-    public static final double Ball2Lift = 0.3 * ratio; //PROCESSOR BALL
-    public static final double Ball2Pivot = 0.18;
-
-    public static final double Ball3Lift = 1.75 * ratio; //BALL LEVEL 1
-    public static final double Ball3Pivot = 0.18;
-
-    public static final double Ball4Lift = 4.75 * ratio; //BALL LEVEL 2
-    public static final double Ball4Pivot = 0.17;
-
-    public static final double Ball5Lift = 10.45 * ratio; //Barge
-    public static final double Ball5Pivot = 0.32; 
-  }
-
-
-  public static final class OpConstantsForPipe {
-    public static final double Pipe1Lift = 0.65 * ratio; //TROUGH (LEVEL 1)
-    public static final double Pipe1Pivot = 0.35;
-
-    public static final double Pipe2Lift = 3.57 * ratio; //LEVEL 2
-    public static final double Pipe2Pivot = 0.21;
-
-    public static final double Pipe3Lift = 5.3 * ratio; //LEVEL 3
-    public static final double Pipe3Pivot = 0.31424;
-
-    public static final double Pipe4Lift = 10.45 * ratio; //LEVEL 4
-    public static final double Pipe4Pivot = 0.24;
-    public static final double Pipe4PivotOut = 0.4; //Applied while outtaking
-
-    public static final double PipeRetLift = 2.8 * ratio;
-    public static final double PipeRetPivot = 0.345;
-
-    public static final double PipeIntakeLift = 2.8 * ratio; //REDUNDENT WITH PipeRetLift
-    public static final double PipeIntakePivot = 0.345; //REDUNDENT WITH PipeRetPivot
-  }
-
-  public static final class IntakeConstants {
-    // Parameters related to the Ball Intake and Pipe Intake
-
-    
-    // Pipe Intake:
-
-    public static final double kPipeIntakeSpeed = -0.75;
-    public static final double kPipeOuttakeSpeed = 0.4;
-    public static final double kPipeOuttakeL1Speed = 0.3;
-    public static final double kPipeOuttakeL4Speed = 0.5;
-
-    public static final int kPipeMotorId = 4; // CAN OK
-    public static final int kPipeSensorChannel = 1; // CAN OK
-
-
-    // Ball Intake:
-
-    public static final double kBallIntakeSpeed = 1;
-    public static final double kBallOuttakeSpeed = -0.5;
-    public static final double kBallOuttakeBargeSpeed = -1.0;
-
-    public static final int kBallMotorId1 = 12; // CAN OK
-    public static final int kBallMotorId2 = 13; // CAN OK
-    public static final int kBallSensorChannel = 0; // CAN OK
-
-  }
-
-  public static final class IntakePositionConstants {
-    public static final int kMaxLiftMotorTemp=75;
-    public static final int kLiftMotor1Id = 5; // CAN OK (NO ENCODER, FOLLOWER MOTOR)
-    public static final int kLiftMotor2Id = 11; // CAN OK (HAS ALTERNATE ENCODER, LEADING MOTOR)
-
-    public static final double kLiftPosP = 0.50; // Used when the lift is going up (error is positive)
-    public static final double kLiftNegP = 0.40; // Used when the lift is going down (error is negative)
-    public static final double kLiftI = 0.005;//0.0015;
-    public static final double kLiftPosD = 0;//0.0001;
-    public static final double kLiftNegD = 0;//0.003;
-    public static final double kLiftIZone = 0.5;
-    public static final double kLiftLoopTolerance = 0;//0.05; // Tolerance for the closed loop
-    public static final double kLiftTolerance = 0.15; // Tolerance for checking whether at setpoint (i.e. checking for when to move on to next command)
-    public static final double kLiftAntigrav = 0;//0.1775; // Antigrav constant: an amount of power added to the PID output to counteract gravity
-
-    public static final int kPivotMotor1Id = 27; // CAN OK (HAS ABSOLUTE ENCODER)
-
-    public static final double kPivotP = 2.75;
-    public static final double kPivotI = 0.005;
-    public static final double kPivotD = 0.0;
-    public static final double kPivotIZone = 0.03;
-    public static final double kPivotLoopTolerance = 0;//0.01; // Tolerance for the closed loop
-    public static final double kPivotTolerance = 0.01; // Tolerance for checking whether at setpoint (i.e. checking for when to move on to next command)
-
-    public static final double stowPivot = 0.30;
-    public static final double stowLift = 0.9 * ratio;
-
-    public static final double bargePivotTravel = 0.30; // pivot moves to this first before lift rises
-    public static final double bargePivot = 0.4;
-    public static final double bargePivotShove = 0.3; // applied while depositing barge
-    public static final double bargeLift = 10.45 * ratio;
-  }
-
-  public static final class HangConstants {
-    // Parameters related to the Hang Subsystem
-
-    public static final double kHangUnlockPos = 1.0; // UNTUNED
-    public static final double kHangTwistPower = 1.0; // UNTUNED
-    public static final double kHangGripPower = 1.0; // UNTUNED
-
-    public static final double kHangLiftPos = 4.75 * ratio;
-    public static final double kHangPivotPos = 0.30;
-
-    public static final int kHangTwistMotorId = 6; // CAN NG
-    public static final int kHangGripMotorId = 7; // CAN NG
-    public static final int kServo1Channel = 0; // CAN OK
-    public static final int kServo2Channel = 1; // CAN OK
-  }
-
-  public static final class TelePathingConstants {
-    public static final PathConstraints kDefaultConstraints = new PathConstraints(2.0, 1.0, 2 * Math.PI, 4 * Math.PI);
-    //public static final PathConstraints kDefaultConstraints = PathConstraints.unlimitedConstraints(12.0); // You can also use unlimited constraints, only limited by motor torque and nominal battery voltage
-  }
+  
 
   public static final class DriveConstants {
     public static final double MaxErrorFromBot = 0.5;
@@ -195,6 +78,16 @@ public final class Constants {
 
     public static final int kPigeonGyroCanId = 5; // CAN OK ("swerve" canbus)
     //public static final boolean kGyroReversed = false;
+  }
+
+  public static final class TransferConstants{
+    public static final int LCanId=0;
+    public static final int RCanId=0;
+    
+    public static final double p=0;
+    public static final double i=0;
+    public static final double d=0;
+    public static final double f=0;
   }
 
   public static final class OIConstants {

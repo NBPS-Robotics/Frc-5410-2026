@@ -36,6 +36,7 @@ import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveModule;
 
@@ -50,6 +51,7 @@ public class RobotContainer
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve"));
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
+  public final TransferSubsystem transfer=new TransferSubsystem();
   public final TestCommand test=new TestCommand(drivebase);
 
 

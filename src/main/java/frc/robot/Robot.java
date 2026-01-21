@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.SensorSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -42,11 +43,9 @@ public class Robot extends TimedRobot
     m_gcTimer.start();
     addPeriodic(()->{
       SensorSubsystem.getInstance().updateAll();//all susbsystems that need pid should have the methods that
-    }, 0.01,0.005);//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
-    instance = this;//it wont be stable then
-
-    //pipeCam = CameraServer.startAutomaticCapture("USB Camera 0", 0);
-    //pipeCam.setVideoMode(PixelFormat.kMJPEG, 192, 144, 15);
+      TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+    }, 0.01,0.005);
+    instance = this;
   }
 
   public static Robot getInstance()
