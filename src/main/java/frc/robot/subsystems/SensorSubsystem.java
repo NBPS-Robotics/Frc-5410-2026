@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.IntakeConstants;
 
 public class SensorSubsystem extends SubsystemBase{
     //btw i cant spell
@@ -17,10 +16,6 @@ public class SensorSubsystem extends SubsystemBase{
     //2. private variable with getter metheod
 
     //all values from the sensors should be updated in the "updateAll" metheod
-    private DigitalInput pipeSwitch=new DigitalInput(IntakeConstants.kPipeSensorChannel);
-    private DigitalInput ballSwitch=new DigitalInput(IntakeConstants.kBallSensorChannel);
-    public boolean ball=false;
-    public boolean pipe=false;
     
     private static SensorSubsystem instance;
 
@@ -37,8 +32,7 @@ public class SensorSubsystem extends SubsystemBase{
     }
 
     public void updateAll(){//update all sensors and values
-        pipe=!pipeSwitch.get();
-        ball=!ballSwitch.get();
+     
     }
 
 }
