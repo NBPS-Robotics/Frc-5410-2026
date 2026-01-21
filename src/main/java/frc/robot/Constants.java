@@ -90,6 +90,12 @@ public final class Constants {
     public static final double f=0;
   }
 
+  public static final class FloorConstants {
+    public static final int canID = 0;
+
+    public static final int motorSpeed = 5000;
+  }
+
   public static final class OIConstants {
     /* public static final int kDriverGamepadPort = 0;
     public static final int kCoDriverGamepadPort = 1;
