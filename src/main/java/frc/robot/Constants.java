@@ -88,6 +88,14 @@ public final class Constants {
     public static final double i=0;
     public static final double d=0;
     public static final double f=0;
+
+    public static final int motorSpeed = 5000;
+  }
+
+  public static final class FloorConstants {
+    public static final int canID = 0;
+
+    public static final double motorSpeed = 0.8;
   }
 
   public static final class FloorConstants {

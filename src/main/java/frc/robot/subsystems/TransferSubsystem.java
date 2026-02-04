@@ -45,7 +45,7 @@ public class TransferSubsystem extends SubsystemBase{
     }
 
     public void setRun(){
-        transferPid.setSetpoint(5000);
+        transferPid.setSetpoint(Constants.TransferConstants.motorSpeed);
     }
 
     public void setStop(){
@@ -53,7 +53,7 @@ public class TransferSubsystem extends SubsystemBase{
     }
 
     public void setOuttake(){
-        transferPid.setSetpoint(-5000);
+        transferPid.setSetpoint(-Constants.TransferConstants.motorSpeed);
     }
 
     public void runPid(){
