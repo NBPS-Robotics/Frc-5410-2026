@@ -25,7 +25,9 @@ public class FloorSubsystem extends SubsystemBase{
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
         SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
 
-        motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        for (int i = 0; i<=5; i++) {
+            motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        }
     }
 
 
