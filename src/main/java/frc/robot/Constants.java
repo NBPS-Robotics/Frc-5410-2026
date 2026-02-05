@@ -80,6 +80,18 @@ public final class Constants {
     //public static final boolean kGyroReversed = false;
   }
 
+  public static final class ShooterConstants {
+    public static final int p = 0;
+    public static final int i = 0;
+    public static final int d = 0;
+    public static final int f = 0;
+
+    public static final int canIDL1 = 0;
+    public static final int canIDL2 = 0;
+    public static final int canIDR1 = 0;
+    public static final int canIDR2 = 0;
+  }
+
   public static final class TransferConstants{
     public static final int LCanId=0;
     public static final int RCanId=0;
