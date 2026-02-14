@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
-import java.io.File;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveSubsystem;
 
 
 public class TestCommand extends SequentialCommandGroup{
+  @SuppressWarnings("unused")
   private final SwerveSubsystem drive;
 
   
