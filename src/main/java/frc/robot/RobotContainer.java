@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.reduxrobotics.sensors.canandmag.Canandmag;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,8 +37,7 @@ import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.TransferSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+
 import swervelib.SwerveModule;
 
 /**
@@ -50,8 +50,7 @@ public class RobotContainer
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve"));
-  public final VisionSubsystem vision = new VisionSubsystem(drivebase);
-  public final TransferSubsystem transfer=new TransferSubsystem();
+
   public final TestCommand test=new TestCommand(drivebase);
 
 
@@ -87,9 +86,9 @@ public class RobotContainer
     registerNamedCommands();
 
     configureBindingsPanel(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
-    setAutoCommands();
+
     
-    SmartDashboard.putData("Autos", autoChooser);
+    //SmartDashboard.putData("Autos", autoChooser);
   }
 
   private void configureBindingsPanel()
@@ -154,14 +153,7 @@ public class RobotContainer
   {
     drivebase.setMotorBrake(brake);
   }
-  public void resetOdometryFromVision() {
-    vision.resetOdometry();
-  }
-
-  public void cancelResetOdometryFromVision() {
-    vision.cancelResetOdometry();
-  }
-
+ 
 
   public void updateSmartDashboard() {
     
