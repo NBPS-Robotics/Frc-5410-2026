@@ -25,6 +25,7 @@ public class IntakeSubsystem extends SubsystemBase{
         return intakeSingleton;
     }
 
+    @SuppressWarnings({"removal"})
     public IntakeSubsystem() {
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
         SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
