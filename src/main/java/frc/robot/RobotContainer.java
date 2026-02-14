@@ -38,6 +38,7 @@ public class RobotContainer
 
   public final TestCommand test=new TestCommand(drivebase);
 
+  private final PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandPS5Controller driverGamepad = new CommandPS5Controller(0);
@@ -118,8 +119,6 @@ public class RobotContainer
   
   public void setAutoCommands(){//TODO:Autos
     autoChooser = AutoBuilder.buildAutoChooser();
-
-    PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
     turnController.setIZone(DriveConstants.kTurningIZone);
     turnController.enableContinuousInput(0, 360);
     turnController.setSetpoint(0);
