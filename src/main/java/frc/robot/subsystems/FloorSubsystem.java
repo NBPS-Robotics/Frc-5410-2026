@@ -22,7 +22,7 @@ public class FloorSubsystem extends SubsystemBase{
     }
 
     public FloorSubsystem() {
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(30, 30);
         SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
 
         for (int i = 0; i<=5; i++) {
