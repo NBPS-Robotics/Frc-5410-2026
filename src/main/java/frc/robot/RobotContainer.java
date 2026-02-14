@@ -111,6 +111,7 @@ public class RobotContainer
     return autoChooser.getSelected(); 
   }
 
+  @SuppressWarnings("unused")
   private static double normalDegrees(double deg) {
     double mod = deg % 360.0;
     if (mod < 0) mod += 360;
