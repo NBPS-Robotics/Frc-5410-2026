@@ -80,17 +80,6 @@ public final class Constants {
     //public static final boolean kGyroReversed = false;
   }
 
-  public static final class ShooterConstants {
-    public static final int p = 0;
-    public static final int i = 0;
-    public static final int d = 0;
-    public static final int f = 0;
-
-    public static final int canIDL1 = 0;
-    public static final int canIDL2 = 0;
-    public static final int canIDR1 = 0;
-    public static final int canIDR2 = 0;
-  }
 
   public static final class TransferConstants{
     public static final int LCanId=0;
@@ -122,7 +111,6 @@ public final class Constants {
   public static final class FloorConstants {
     public static final int canID = 0;
 
-<<<<<<< HEAD
     public static final double motorSpeed = 1;
   }
 
@@ -142,10 +130,8 @@ public final class Constants {
 
     public static final double iZone=0;
 
-    public static final double motorSpeed = 1;
-=======
     public static final double motorSpeed = 5000;
->>>>>>> 53e1d893a4015e8f05168be14278cab9e39231eb
+
   }
 
   public static final class OIConstants {
