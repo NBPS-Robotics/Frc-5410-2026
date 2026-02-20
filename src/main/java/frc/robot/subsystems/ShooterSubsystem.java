@@ -8,6 +8,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,6 +20,8 @@ public class ShooterSubsystem extends SubsystemBase{
     private final SparkMax rBottom = new SparkMax(ShooterConstants.R2CanId, MotorType.kBrushless);
     private final SparkMax lTop = new SparkMax(ShooterConstants.LCanId, MotorType.kBrushless);
     private final SparkMax lBottom = new SparkMax(ShooterConstants.L2CanId, MotorType.kBrushless);
+
+    private final Servo hoodServo = new Servo(ShooterConstants.ServoPWMID);
 
     private final PIDController shooterPidR=new PIDController(ShooterConstants.p, ShooterConstants.i, ShooterConstants.d);
     private final PIDController shooterPidL=new PIDController(ShooterConstants.p, ShooterConstants.i, ShooterConstants.d);
@@ -78,6 +81,10 @@ public class ShooterSubsystem extends SubsystemBase{
         lTop.set((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lTop.getEncoder().getVelocity()));
     }
 
+    public void setHood(double position){
+        hoodServo.set(position);
+    }
+
     //commands
     public Command shootCommand(){
         return this.runOnce(()->setSpeed(5000));
@@ -90,6 +97,9 @@ public class ShooterSubsystem extends SubsystemBase{
     }
     public Command feedCommand(){
         return this.runOnce(()->setFeed());
+    }
+    public Command hoodCommand(double position){
+        return this.runOnce(()->setHood(position));
     }
 
 }
