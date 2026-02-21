@@ -105,6 +105,7 @@ public final class Constants {
 
     public static final int feedSpeed = 3000;
     public static final int idleSpeed = 1000;
+    public static final int ServoPWMID = 0;
   }
 
   public static final class FloorConstants {
@@ -131,6 +132,17 @@ public final class Constants {
 
     public static final double motorSpeed = 5000;
 
+  }
+
+  public static final class HangConstants {
+    public static final int canID = 0;
+    public static final int ServoPWMID = 0;
+
+    public static final double p=0;
+    public static final double i=0;
+    public static final double d=0;
+    public static final double iZone=0;
+    public static final double tolerance=0;
   }
 
   public static final class OIConstants {
