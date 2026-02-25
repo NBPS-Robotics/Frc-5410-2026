@@ -5,24 +5,39 @@
 package frc.robot;
 
 import java.io.File;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.OIConstants;
+import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.robot.commands.UtilCommands.OpCommands;
+import frc.robot.commands.UtilCommands.WaitCommand;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.SwerveSubsystem;
-
+import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveModule;
 
 /**
@@ -35,10 +50,10 @@ public class RobotContainer
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve"));
-
+  public final VisionSubsystem vision = new VisionSubsystem(drivebase);
+  public final TransferSubsystem transfer=new TransferSubsystem();
   public final TestCommand test=new TestCommand(drivebase);
 
-  private final PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandPS5Controller driverGamepad = new CommandPS5Controller(0);
@@ -72,9 +87,9 @@ public class RobotContainer
     registerNamedCommands();
 
     configureBindingsPanel(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
-
+    setAutoCommands();
     
-    //SmartDashboard.putData("Autos", autoChooser);
+    SmartDashboard.putData("Autos", autoChooser);
   }
 
   private void configureBindingsPanel()
@@ -111,7 +126,6 @@ public class RobotContainer
     return autoChooser.getSelected(); 
   }
 
-  @SuppressWarnings("unused")
   private static double normalDegrees(double deg) {
     double mod = deg % 360.0;
     if (mod < 0) mod += 360;
@@ -120,6 +134,8 @@ public class RobotContainer
   
   public void setAutoCommands(){//TODO:Autos
     autoChooser = AutoBuilder.buildAutoChooser();
+
+    PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
     turnController.setIZone(DriveConstants.kTurningIZone);
     turnController.enableContinuousInput(0, 360);
     turnController.setSetpoint(0);
@@ -138,7 +154,14 @@ public class RobotContainer
   {
     drivebase.setMotorBrake(brake);
   }
- 
+  public void resetOdometryFromVision() {
+    vision.resetOdometry();
+  }
+
+  public void cancelResetOdometryFromVision() {
+    vision.cancelResetOdometry();
+  }
+
 
   public void updateSmartDashboard() {
     
