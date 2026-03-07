@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -35,6 +36,9 @@ import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
 import frc.robot.commands.TestCommand;
+import frc.robot.subsystems.FloorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -52,7 +56,10 @@ public class RobotContainer
                                                                          "swerve"));
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
   public final TransferSubsystem transfer=new TransferSubsystem();
+  public final ShooterSubsystem shooter=ShooterSubsystem.getInstance();
   public final TestCommand test=new TestCommand(drivebase);
+  public final FloorSubsystem floor = new FloorSubsystem();
+  public final IntakeSubsystem intake = new IntakeSubsystem();
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -100,9 +107,23 @@ public class RobotContainer
     //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
+    shooter.runPidCommand();
+    shooter.setDefaultCommand(shooter.runPidCommand());
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    
+    driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
+
+    driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreaseP));
+    driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreaseP));
+    driverGamepad.povLeft().onTrue(new InstantCommand(shooter::setDecreaseF));
+    driverGamepad.povRight().onTrue(new InstantCommand(shooter::setIncreaseF));
+
+    driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
+    driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
+    driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
+    driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
   }
 
 
@@ -133,7 +154,7 @@ public class RobotContainer
   }
   
   public void setAutoCommands(){//TODO:Autos
-    autoChooser = AutoBuilder.buildAutoChooser();
+   // autoChooser = AutoBuilder.buildAutoChooser();
 
     PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
     turnController.setIZone(DriveConstants.kTurningIZone);

@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.SensorSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 
 /**
@@ -43,7 +45,8 @@ public class Robot extends TimedRobot
     m_gcTimer.start();
     addPeriodic(()->{
       SensorSubsystem.getInstance().updateAll();//all susbsystems that need pid should have the methods that
-      TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+      //TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+      ShooterSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
   }
@@ -135,6 +138,7 @@ public class Robot extends TimedRobot
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    ShooterSubsystem.getInstance().setSpeed(ShooterConstants.shootSpeed);
   }
 
   /**
@@ -161,6 +165,7 @@ public class Robot extends TimedRobot
     }
     m_robotContainer.setDriveMode();
     m_robotContainer.setMotorBrake(true);
+    ShooterSubsystem.getInstance().setIdle();
   }
 
   /**

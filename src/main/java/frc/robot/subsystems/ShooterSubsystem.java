@@ -9,14 +9,16 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase{
 
-    private final SparkMax rTop = new SparkMax(ShooterConstants.LCanId, MotorType.kBrushless);
+    private final SparkMax rTop = new SparkMax(ShooterConstants.RCanId, MotorType.kBrushless);
     private final SparkMax rBottom = new SparkMax(ShooterConstants.R2CanId, MotorType.kBrushless);
     private final SparkMax lTop = new SparkMax(ShooterConstants.LCanId, MotorType.kBrushless);
     private final SparkMax lBottom = new SparkMax(ShooterConstants.L2CanId, MotorType.kBrushless);
@@ -41,10 +43,10 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public ShooterSubsystem(){
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
-        rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
+        rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
         right2Config=new SparkMaxConfig().apply(sharedConfig).follow(rTop);
-        leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
+        leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
         left2Config=new SparkMaxConfig().apply(sharedConfig).follow(lTop);
         shooterPidR.setSetpoint(0);
         shooterPidL.setSetpoint(0);
@@ -57,9 +59,34 @@ public class ShooterSubsystem extends SubsystemBase{
 
     }
 
+    public void setIncreaseP(){
+        shooterPidL.setP(shooterPidL.getP()+0.00005);
+        shooterPidR.setP(shooterPidR.getP()+0.00005);
+    }
+
+    public void setDecreaseP(){
+        shooterPidL.setP(shooterPidL.getP()-0.00005);
+        shooterPidR.setP(shooterPidR.getP()-0.00005);
+    }
+
+    public void setIncreaseF(){
+        ShooterConstants.f+=0.00005;
+    }
+    public void addI(){
+        shooterPidL.reset();
+        shooterPidR.reset();
+        shooterPidL.setI(0.000001);
+        shooterPidR.setI(0.000001);
+    }
+
+    public void setDecreaseF(){
+        ShooterConstants.f-=0.00005;
+    }
+    
     public void setSpeed(double speed){
         shooterPidR.setSetpoint(speed);
         shooterPidL.setSetpoint(speed);
+        addI();
     }
 
     public void setStop(){
@@ -69,6 +96,8 @@ public class ShooterSubsystem extends SubsystemBase{
     public void setIdle(){
         shooterPidR.setSetpoint(ShooterConstants.idleSpeed);
         shooterPidL.setSetpoint(ShooterConstants.idleSpeed);
+        shooterPidL.setI(0.00);
+        shooterPidR.setI(0.00);
     }
 
     public void setFeed(){
@@ -77,17 +106,34 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public void runPid(){
-        rTop.set((shooterPidR.getSetpoint()*ShooterConstants.f)+shooterPidR.calculate(rTop.getEncoder().getVelocity()));
-        lTop.set((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lTop.getEncoder().getVelocity()));
+        rTop.set((shooterPidR.getSetpoint()*ShooterConstants.f)+shooterPidR.calculate(rBottom.getEncoder().getVelocity()));
+        lTop.set(-((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lBottom.getEncoder().getVelocity())));
     }
-
+    public Command runPidCommand(){
+        return new InstantCommand(()->runPid(),this);
+    }
     public void setHood(double position){
         hoodServo.set(position);
     }
 
+    public void telemetry(){
+      SmartDashboard.putNumber("p",shooterPidL.getP());
+      SmartDashboard.putNumber("f",ShooterConstants.f);
+      SmartDashboard.putNumber("speed",rBottom.getEncoder().getVelocity());
+      SmartDashboard.putNumber("POWER",rBottom.getAppliedOutput());
+      SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rBottom.getEncoder().getVelocity()));
+      SmartDashboard.updateValues();
+      runPid();
+    }
+
+    @Override
+    public void periodic(){
+        telemetry();
+    }
+
     //commands
     public Command shootCommand(){
-        return this.runOnce(()->setSpeed(5000));
+        return this.runOnce(()->setSpeed(ShooterConstants.shootSpeed));
     }
     public Command stopCommand(){
         return this.runOnce(()->setStop());

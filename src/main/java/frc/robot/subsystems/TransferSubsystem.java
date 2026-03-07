@@ -14,13 +14,13 @@ import frc.robot.Constants;
 
 public class TransferSubsystem extends SubsystemBase{
 
-    private final SparkMax leftTransfer = new SparkMax(Constants.TransferConstants.LCanId, MotorType.kBrushless);
+   // private final SparkMax leftTransfer = new SparkMax(Constants.TransferConstants.LCanId, MotorType.kBrushless);
     private final SparkMax rightTransfer = new SparkMax(Constants.TransferConstants.RCanId, MotorType.kBrushless);
 
     private final PIDController transferPid=new PIDController(Constants.TransferConstants.p, Constants.TransferConstants.i, Constants.TransferConstants.d);
 
     private final SparkBaseConfig rightConfig;
-    private final SparkBaseConfig leftConfig;
+    //private final SparkBaseConfig leftConfig;
 
     private static TransferSubsystem instance;
 
@@ -32,13 +32,13 @@ public class TransferSubsystem extends SubsystemBase{
     }
 
     public TransferSubsystem(){
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
-        rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
-        leftConfig=new SparkMaxConfig().apply(sharedConfig).follow(leftTransfer);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40).inverted(true);
+        rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
+        //leftConfig=new SparkMaxConfig().apply(sharedConfig).follow(leftTransfer);
         transferPid.setSetpoint(0);
         for(int i=0; i<=5; i++){
             rightTransfer.configure(rightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-            leftTransfer.configure(leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+           // leftTransfer.configure(leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
 
     }
@@ -47,8 +47,16 @@ public class TransferSubsystem extends SubsystemBase{
         transferPid.setSetpoint(Constants.TransferConstants.motorSpeed);
     }
 
+    public void setRunFull(){
+        rightTransfer.set(1);
+    }
+    public void setRunFullB(){
+        rightTransfer.set(-1);
+    }
+
     public void setStop(){
         transferPid.setSetpoint(0);
+        rightTransfer.set(0);
     }
 
     public void setOuttake(){

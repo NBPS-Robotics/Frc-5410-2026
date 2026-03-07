@@ -27,9 +27,9 @@ public class IntakeSubsystem extends SubsystemBase{
 
     @SuppressWarnings({"removal"})
     public IntakeSubsystem() {
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
         SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
-        SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig).inverted(true);
+        SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
         SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(sharedConfig);
         pivotConfig.closedLoop.outputRange(-1, 1)
                                     .pid(IntakeConstants.p, IntakeConstants.i, IntakeConstants.d)
@@ -49,23 +49,26 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
     public void deploy() {
-        pivot.getClosedLoopController().setSetpoint(IntakeConstants.deploy, ControlType.kMAXMotionPositionControl);
+        pivot.getClosedLoopController().setSetpoint(IntakeConstants.deploy, ControlType.kPosition);
     }
 
      public void stow() {
-        pivot.getClosedLoopController().setSetpoint(IntakeConstants.stow, ControlType.kMAXMotionPositionControl);
+        pivot.getClosedLoopController().setSetpoint(IntakeConstants.stow, ControlType.kPosition);
     }
 
     public void doIntake() {
-        motor.set(Constants.FloorConstants.motorSpeed);
+        motor.set(-1);
+        motor2.set(-1);
     }
 
     public void doOuttake() {
-        motor.set(-Constants.FloorConstants.motorSpeed);
+        motor.set(-1);
+        motor2.set(1);
     }
 
     public void stopIntake() {
         motor.set(0.0);
+        motor2.set(0.0);
     }
 
 

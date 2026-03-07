@@ -81,8 +81,8 @@ public final class Constants {
 
 
   public static final class TransferConstants{
-    public static final int LCanId=0;
-    public static final int RCanId=0;
+    public static final int LCanId=10;
+    public static final int RCanId=10;
     
     public static final double p=0;
     public static final double i=0;
@@ -93,31 +93,32 @@ public final class Constants {
   }
 
   public static final class ShooterConstants{
-    public static final int LCanId=0;
-    public static final int RCanId=0;
-    public static final int L2CanId=0;
-    public static final int R2CanId=0;
+    public static final int LCanId=30;
+    public static final int RCanId=6;
+    public static final int L2CanId=9;
+    public static final int R2CanId=7;
     
-    public static final double p=0;
-    public static final double i=0;
-    public static final double d=0;
-    public static final double f=0;
+    public static final double p=0.000;
+    public static final double i=0.000;
+    public static final double d=0.000;
+    public static double f=0.0002;
 
-    public static final int feedSpeed = 3000;
-    public static final int idleSpeed = 1000;
+    public static final int feedSpeed = 2000;
+    public static final int shootSpeed = 1500;
+    public static final int idleSpeed = 300;
     public static final int ServoPWMID = 0;
   }
 
   public static final class FloorConstants {
-    public static final int canID = 0;
+    public static final int canID = 11;
 
     public static final double motorSpeed = 1;
   }
 
   public static final class IntakeConstants {
-    public static final int canID = 0;
-    public static final int canID2 = 0;
-    public static final int pivotID = 0;
+    public static final int canID = 13;
+    public static final int canID2 = 14;
+    public static final int pivotID = 12;
 
     public static final double p=0;
     public static final double i=0;
