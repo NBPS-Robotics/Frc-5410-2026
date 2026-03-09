@@ -86,7 +86,7 @@ public class ShooterSubsystem extends SubsystemBase{
     public void setSpeed(double speed){
         shooterPidR.setSetpoint(speed);
         shooterPidL.setSetpoint(speed);
-        addI();
+        //addI();
     }
 
     public void setStop(){
@@ -106,9 +106,14 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public void runPid(){
-        rTop.set((shooterPidR.getSetpoint()*ShooterConstants.f)+shooterPidR.calculate(rBottom.getEncoder().getVelocity()));
-        lTop.set(-((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lBottom.getEncoder().getVelocity())));
+        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.f)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
+        SmartDashboard.putNumber("rTop Power Set", rTopSet);
+        rTop.set(rTopSet);
+        double lTopSet = -((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lTop.getEncoder().getVelocity()));
+        SmartDashboard.putNumber("lTop Power Set", lTopSet);
+        lTop.set(lTopSet);
     }
+
     public Command runPidCommand(){
         return new InstantCommand(()->runPid(),this);
     }
@@ -119,11 +124,11 @@ public class ShooterSubsystem extends SubsystemBase{
     public void telemetry(){
       SmartDashboard.putNumber("p",shooterPidL.getP());
       SmartDashboard.putNumber("f",ShooterConstants.f);
-      SmartDashboard.putNumber("speed",rBottom.getEncoder().getVelocity());
-      SmartDashboard.putNumber("POWER",rBottom.getAppliedOutput());
-      SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rBottom.getEncoder().getVelocity()));
-      SmartDashboard.updateValues();
+      SmartDashboard.putNumber("speed",rTop.getEncoder().getVelocity());
+      SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
+      //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
       runPid();
+      SmartDashboard.updateValues();
     }
 
     @Override

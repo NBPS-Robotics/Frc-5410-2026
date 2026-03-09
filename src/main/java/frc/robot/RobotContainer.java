@@ -108,7 +108,7 @@ public class RobotContainer
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
     shooter.runPidCommand();
-    shooter.setDefaultCommand(shooter.runPidCommand());
+    //shooter.setDefaultCommand(shooter.runPidCommand());
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
