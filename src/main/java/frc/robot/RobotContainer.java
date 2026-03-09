@@ -115,15 +115,20 @@ public class RobotContainer
     
     driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
 
-    driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreaseP));
-    driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreaseP));
-    driverGamepad.povLeft().onTrue(new InstantCommand(shooter::setDecreaseF));
-    driverGamepad.povRight().onTrue(new InstantCommand(shooter::setIncreaseF));
+    driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreasePL));
+    driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreasePL));
+    driverGamepad.povLeft().onTrue(new InstantCommand(shooter::setDecreaseFL));
+    driverGamepad.povRight().onTrue(new InstantCommand(shooter::setIncreaseFL));
 
-    driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
-    driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
-    driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
-    driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
+    driverGamepad.cross().onTrue(new InstantCommand(shooter::setDecreasePR));
+    driverGamepad.triangle().onTrue(new InstantCommand(shooter::setIncreasePR));
+    driverGamepad.square().onTrue(new InstantCommand(shooter::setDecreaseFR));
+    driverGamepad.circle().onTrue(new InstantCommand(shooter::setIncreaseFR));
+
+    //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
+    //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
+    driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
+    //driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
   }
 
 

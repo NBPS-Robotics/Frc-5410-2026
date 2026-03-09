@@ -25,8 +25,8 @@ public class ShooterSubsystem extends SubsystemBase{
 
     private final Servo hoodServo = new Servo(ShooterConstants.ServoPWMID);
 
-    private final PIDController shooterPidR=new PIDController(ShooterConstants.p, ShooterConstants.i, ShooterConstants.d);
-    private final PIDController shooterPidL=new PIDController(ShooterConstants.p, ShooterConstants.i, ShooterConstants.d);
+    private final PIDController shooterPidR=new PIDController(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr);
+    private final PIDController shooterPidL=new PIDController(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl);
 
     private final SparkBaseConfig rightConfig;
     private final SparkBaseConfig right2Config;
@@ -46,7 +46,7 @@ public class ShooterSubsystem extends SubsystemBase{
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
         right2Config=new SparkMaxConfig().apply(sharedConfig).follow(rTop);
-        leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
+        leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
         left2Config=new SparkMaxConfig().apply(sharedConfig).follow(lTop);
         shooterPidR.setSetpoint(0);
         shooterPidL.setSetpoint(0);
@@ -59,33 +59,49 @@ public class ShooterSubsystem extends SubsystemBase{
 
     }
 
-    public void setIncreaseP(){
-        shooterPidL.setP(shooterPidL.getP()+0.00005);
-        shooterPidR.setP(shooterPidR.getP()+0.00005);
+    public void setIncreasePR(){
+        ShooterConstants.pr+=0.000001;
+		shooterPidR.setP(ShooterConstants.pr);
+    }
+    public void setIncreasePL(){
+        ShooterConstants.pl+=0.000001;
+		shooterPidL.setP(ShooterConstants.pl);
+    }
+    public void setDecreasePR(){
+        ShooterConstants.pr-=0.000001;
+		shooterPidR.setP(ShooterConstants.pr);
+    }
+    public void setDecreasePL(){
+        ShooterConstants.pl-=0.000001;
+		shooterPidL.setP(ShooterConstants.pl);
     }
 
-    public void setDecreaseP(){
-        shooterPidL.setP(shooterPidL.getP()-0.00005);
-        shooterPidR.setP(shooterPidR.getP()-0.00005);
+    public void setIncreaseFR(){
+        ShooterConstants.fr+=0.000001;
+    }
+    public void setIncreaseFL(){
+        ShooterConstants.fl+=0.000001;
+    }
+    public void setDecreaseFR(){
+        ShooterConstants.fr-=0.000001;
+    }
+    public void setDecreaseFL(){
+        ShooterConstants.fl-=0.000001;
     }
 
-    public void setIncreaseF(){
-        ShooterConstants.f+=0.00005;
-    }
+
     public void addI(){
         shooterPidL.reset();
         shooterPidR.reset();
         shooterPidL.setI(0.000001);
         shooterPidR.setI(0.000001);
     }
-
-    public void setDecreaseF(){
-        ShooterConstants.f-=0.00005;
-    }
     
     public void setSpeed(double speed){
         shooterPidR.setSetpoint(speed);
         shooterPidL.setSetpoint(speed);
+        shooterPidR.setP(ShooterConstants.pr);
+        shooterPidL.setP(ShooterConstants.pl);
         //addI();
     }
 
@@ -96,6 +112,8 @@ public class ShooterSubsystem extends SubsystemBase{
     public void setIdle(){
         shooterPidR.setSetpoint(ShooterConstants.idleSpeed);
         shooterPidL.setSetpoint(ShooterConstants.idleSpeed);
+        shooterPidR.setP(0.00002);
+        shooterPidL.setP(0.00002);
         shooterPidL.setI(0.00);
         shooterPidR.setI(0.00);
     }
@@ -106,10 +124,10 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public void runPid(){
-        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.f)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
+        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.fr)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
         SmartDashboard.putNumber("rTop Power Set", rTopSet);
         rTop.set(rTopSet);
-        double lTopSet = -((shooterPidL.getSetpoint()*ShooterConstants.f)+shooterPidL.calculate(lTop.getEncoder().getVelocity()));
+        double lTopSet = (shooterPidL.getSetpoint()*ShooterConstants.fl)+shooterPidL.calculate(lTop.getEncoder().getVelocity());
         SmartDashboard.putNumber("lTop Power Set", lTopSet);
         lTop.set(lTopSet);
     }
@@ -122,9 +140,12 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public void telemetry(){
-      SmartDashboard.putNumber("p",shooterPidL.getP());
-      SmartDashboard.putNumber("f",ShooterConstants.f);
-      SmartDashboard.putNumber("speed",rTop.getEncoder().getVelocity());
+      SmartDashboard.putNumber("pr",shooterPidR.getP());
+      SmartDashboard.putNumber("fr",ShooterConstants.fr);
+      SmartDashboard.putNumber("pl",shooterPidL.getP());
+      SmartDashboard.putNumber("fl",ShooterConstants.fl);
+      SmartDashboard.putNumber("r speed",rTop.getEncoder().getVelocity());
+      SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
       runPid();
