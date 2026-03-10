@@ -55,11 +55,11 @@ public class RobotContainer
   public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve"));
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
-  public final TransferSubsystem transfer=new TransferSubsystem();
+  public final TransferSubsystem transfer=TransferSubsystem.getInstance();
   public final ShooterSubsystem shooter=ShooterSubsystem.getInstance();
   public final TestCommand test=new TestCommand(drivebase);
-  public final FloorSubsystem floor = new FloorSubsystem();
-  public final IntakeSubsystem intake = new IntakeSubsystem();
+  public final FloorSubsystem floor = FloorSubsystem.getInstance();
+  public final IntakeSubsystem intake = IntakeSubsystem.getInstance();
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -126,7 +126,7 @@ public class RobotContainer
     driverGamepad.triangle().onTrue(new InstantCommand(shooter::setIncreasePR));
     driverGamepad.square().onTrue(new InstantCommand(shooter::setDecreaseFR));
     driverGamepad.circle().onTrue(new InstantCommand(shooter::setIncreaseFR));
-
+    
     //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
     //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
     driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
