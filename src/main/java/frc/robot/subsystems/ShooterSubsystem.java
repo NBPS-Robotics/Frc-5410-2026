@@ -23,7 +23,8 @@ public class ShooterSubsystem extends SubsystemBase{
     private final SparkMax lTop = new SparkMax(ShooterConstants.LCanId, MotorType.kBrushless);
     private final SparkMax lBottom = new SparkMax(ShooterConstants.L2CanId, MotorType.kBrushless);
 
-    private final Servo hoodServo = new Servo(ShooterConstants.ServoPWMID);
+    private final Servo hoodServoR = new Servo(ShooterConstants.RServoPWMID);
+    private final Servo hoodServoL = new Servo(ShooterConstants.LServoPWMID);
 
     private final PIDController shooterPidR=new PIDController(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr);
     private final PIDController shooterPidL=new PIDController(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl);
@@ -57,6 +58,8 @@ public class ShooterSubsystem extends SubsystemBase{
             lBottom.configure(left2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
 
+        hoodServoR.set(0.60);
+        hoodServoL.set(0.60);
     }
 
     public void setIncreasePR(){
@@ -135,8 +138,9 @@ public class ShooterSubsystem extends SubsystemBase{
     public Command runPidCommand(){
         return new InstantCommand(()->runPid(),this);
     }
-    public void setHood(double position){
-        hoodServo.set(position);
+    public void setHood(double val){
+        hoodServoR.set(hoodServoR.get()+val);
+        hoodServoL.set(hoodServoL.get()+val);
     }
 
     public void telemetry(){
@@ -147,6 +151,7 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("r speed",rTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
+      SmartDashboard.putNumber("Servo Set", hoodServoL.get());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
       runPid();
       SmartDashboard.updateValues();
@@ -170,8 +175,8 @@ public class ShooterSubsystem extends SubsystemBase{
     public Command feedCommand(){
         return this.runOnce(()->setFeed());
     }
-    public Command hoodCommand(double position){
-        return this.runOnce(()->setHood(position));
+    public Command hoodCommand(double val){
+        return this.runOnce(()->setHood(val));
     }
 
 }
