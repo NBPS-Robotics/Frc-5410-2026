@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 
@@ -57,13 +58,24 @@ public class IntakeSubsystem extends SubsystemBase{
         pivot.getClosedLoopController().setSetpoint(IntakeConstants.stow, ControlType.kPosition);
     }
 
+    public boolean getAtPosistion(){
+        return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<=10;
+    }
+
+    public Trigger atStow(){
+        return new Trigger(()->getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.stow);
+    }
+    public Trigger atDeploy(){
+        return new Trigger(()->getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.deploy);
+    }
+
     public void doIntake() {
         motor.set(-1);
         motor2.set(-1);
     }
 
     public void doOuttake() {
-        motor.set(-1);
+        motor.set(1);
         motor2.set(1);
     }
 

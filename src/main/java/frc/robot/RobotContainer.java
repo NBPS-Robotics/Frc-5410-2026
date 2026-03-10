@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -93,12 +94,15 @@ public class RobotContainer
     // Register commands for PathPlanner
     registerNamedCommands();
 
-    configureBindingsPanel(); // controls where driver confirms posistion selected by codriver with more automation, most of the time auto stows
+    configureBindingsPanel(); // testing code
+    //configureBindingsPane2(); // testing code
+
     setAutoCommands();
     
     SmartDashboard.putData("Autos", autoChooser);
   }
 
+  //testing mode
   private void configureBindingsPanel()
   {
 
@@ -107,8 +111,6 @@ public class RobotContainer
     //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
-    shooter.runPidCommand();
-    //shooter.setDefaultCommand(shooter.runPidCommand());
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
@@ -131,6 +133,60 @@ public class RobotContainer
     //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
     driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
     //driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
+  }
+
+  //comp bindings
+  private void configureBindingsPane2()
+  {
+
+    // DRIVER CONTROLS:
+
+    //Joysticks (Default) - Drive the robot
+    Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
+    drivebase.setDefaultCommand(driveCommand);
+
+    //Options - Zeros the robot heading
+    driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    
+    
+    //if its already at the deploy posistion we just intake
+    driverGamepad.L2().and(intake.atDeploy()).onTrue(new ParallelCommandGroup(
+      intake.deployCommand(),
+      intake.intakeCommand()
+    ));
+    //if its at stow we wait a for it to hit target posistion or a second before intaking
+    driverGamepad.L2().and(intake.atStow()).onTrue(new SequentialCommandGroup(
+      intake.deployCommand(),
+      new ParallelRaceGroup(
+        new WaitUntilCommand(intake.atDeploy()),
+        new WaitCommand(1)),
+      intake.intakeCommand()
+    ));
+    // if its neither at stow or intake we just intake and attempt to deploy, handles if intake is on a ball
+    driverGamepad.L2().and(intake.atStow().negate().and(intake.atDeploy().negate())).onTrue(new ParallelCommandGroup(
+      intake.deployCommand(),
+      intake.intakeCommand()
+    ));
+    driverGamepad.L2().onFalse(intake.stopCommand());
+
+    //stow button
+    driverGamepad.L1().onTrue(new ParallelCommandGroup(
+      intake.stowCommand(),
+      intake.intakeCommand()
+    )).onFalse(intake.stopCommand());
+
+    driverGamepad.R2();//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
+    driverGamepad.R1();//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
+    driverGamepad.povUp();//TODO: Toggle feed mode, shooter modes should be a state machine
+    //modes should function as such:
+    //shoot mode: always aim the hood so its ready when r2 is pressed
+    //feed mode: same but for feed aiming
+    //stow mode: keep hood down for protection
+    //on r2 press: if in shoot or feed aim robot yaw for shots and spin up shooter, when both ready shoot
+
+    //also add shoot on the move toggle to the button panel along with overrides we may find we need later
+
+
   }
 
 
