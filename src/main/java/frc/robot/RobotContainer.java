@@ -95,7 +95,6 @@ public class RobotContainer
   {
     // Register commands for PathPlanner
     registerNamedCommands();
-
     //configureBindingsPanel(); // testing code
     configureBindingsPane2(); // testing code
 
@@ -155,7 +154,7 @@ public class RobotContainer
     
     
     //if its already at the deploy posistion we just intake
-    driverGamepad.L2().and(intake.atDeploy()).onTrue(new ParallelCommandGroup(
+    driverGamepad.L2().and(intake.atDeploy()).onTrue(new SequentialCommandGroup(
       intake.deployCommand(),
       intake.intakeCommand()
     ));
@@ -168,7 +167,7 @@ public class RobotContainer
       intake.intakeCommand()
     ));
     // if its neither at stow or intake we just intake and attempt to deploy, handles if intake is on a ball
-    driverGamepad.L2().and(intake.atStow().negate().and(intake.atDeploy().negate())).onTrue(new ParallelCommandGroup(
+    driverGamepad.L2().and(intake.atStow().negate().and(intake.atDeploy().negate())).onTrue(new SequentialCommandGroup(
       intake.deployCommand(),
       intake.intakeCommand()
     ));
