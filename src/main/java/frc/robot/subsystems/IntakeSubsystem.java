@@ -47,16 +47,16 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
 
-    public void zero() {
+    public void zero() {//
         pivot.getEncoder().setPosition(0);
     }
 
-    public void setBrake() {
+    public void setBrake() {//
         pivotConfig.idleMode(IdleMode.kBrake);
         pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void setCoast() {
+    public void setCoast() {//
         pivotConfig.idleMode(IdleMode.kCoast);
         pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -103,11 +103,11 @@ public class IntakeSubsystem extends SubsystemBase{
 
 
 
-    public Command intakeCommand(){
+    public Command intakeCommand(){//
         return this.runOnce(()->doIntake());
     }
 
-    public Command zeroCommand(){
+    public Command zeroCommand(){//
         return this.runOnce(()->pivot.getEncoder().setPosition(0));
     }
 
