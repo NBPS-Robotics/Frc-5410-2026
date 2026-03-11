@@ -7,7 +7,10 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.FloorSubsystem;
@@ -100,8 +103,9 @@ public class ShooterCommands {
 
         Translation2d relativeGoalPose = getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose);
 
-        Command driveFieldOrientedAnglularVelocity = getTurnAndDriveCommand(drivebase, gamepad, relativeGoalPose);
-        
+        Command driveCommand = new InstantCommand(()->getTurnAndDriveCommand(drivebase, gamepad, relativeGoalPose).execute());
+        driveCommand.addRequirements(drivebase);
+
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         double distance = drivebase.getPose().getTranslation().getDistance(relativeGoalPose);
         Command shootCommand = shooter.shootCommand().alongWith(shooter.hoodCommand(hoodAngle(distance)));
@@ -112,9 +116,9 @@ public class ShooterCommands {
         Command loadBallsCommand = intake.intakeCommand().alongWith(floor.intakeCommand()).alongWith(new InstantCommand(transfer::setRunFull));
 
         if (Math.abs(getTurnSpeed(drivebase, gamepad, relativeGoalPose)) < 0.5) {
-            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand).alongWith(loadBallsCommand);
+            return driveCommand.alongWith(shootCommand).alongWith(loadBallsCommand);
         } else {
-            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
+            return driveCommand.alongWith(shootCommand);
         }
     }
 }
