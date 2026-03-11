@@ -116,8 +116,8 @@ public class RobotContainer
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
     
     driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
-    driverGamepad.L1().onTrue(shooter.hoodCommand(-0.01));
-    driverGamepad.R1().onTrue(shooter.hoodCommand(0.01));
+    driverGamepad.L1().onTrue(shooter.hoodCommand(0.5));
+    driverGamepad.R1().onTrue(shooter.hoodCommand(0.75));
 
     driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreasePL));
     driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreasePL));

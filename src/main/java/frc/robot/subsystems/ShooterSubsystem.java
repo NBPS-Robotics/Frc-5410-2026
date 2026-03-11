@@ -139,8 +139,8 @@ public class ShooterSubsystem extends SubsystemBase{
         return new InstantCommand(()->runPid(),this);
     }
     public void setHood(double val){
-        hoodServoR.set(hoodServoR.get()+val);
-        hoodServoL.set(hoodServoL.get()+val);
+        hoodServoR.set(val);
+        hoodServoL.set(val);
     }
 
     public void telemetry(){
@@ -152,6 +152,7 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
       SmartDashboard.putNumber("Servo Set", hoodServoL.get());
+      SmartDashboard.putBoolean("at speed", shooterPidL.atSetpoint());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
       runPid();
       SmartDashboard.updateValues();
