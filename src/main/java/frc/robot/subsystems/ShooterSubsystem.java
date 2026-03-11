@@ -26,8 +26,8 @@ public class ShooterSubsystem extends SubsystemBase{
     private final Servo hoodServoR = new Servo(ShooterConstants.RServoPWMID);
     private final Servo hoodServoL = new Servo(ShooterConstants.LServoPWMID);
 
-    private final PIDController shooterPidR=new PIDController(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr);
-    private final PIDController shooterPidL=new PIDController(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl);
+    public final PIDController shooterPidR=new PIDController(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr);
+    public final PIDController shooterPidL=new PIDController(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl);
 
     private final SparkBaseConfig rightConfig;
     private final SparkBaseConfig right2Config;
@@ -92,6 +92,9 @@ public class ShooterSubsystem extends SubsystemBase{
         ShooterConstants.fl-=0.000001;
     }
 
+    public boolean atSpeed(){
+        return (Math.abs(shooterPidL.getSetpoint()-lTop.getEncoder().getVelocity())<70)&&(Math.abs(shooterPidR.getSetpoint()-rTop.getEncoder().getVelocity())<70);
+    }
 
     public void addI(){
         shooterPidL.reset();
@@ -149,6 +152,9 @@ public class ShooterSubsystem extends SubsystemBase{
     public void setHood(double val){
         hoodServoR.set(val);
         hoodServoL.set(val+0.02);
+    }
+    public boolean isShootMode(){
+        return hoodServoR.getPosition()==(0.52)||hoodServoR.getPosition()==(0.77);
     }
 
     public void telemetry(){

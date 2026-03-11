@@ -179,9 +179,13 @@ public class RobotContainer
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
 
-    driverGamepad.R2();//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
-    driverGamepad.R1();//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
-    driverGamepad.povUp();//TODO: Toggle feed mode, shooter modes should be a state machine
+    driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand(),intake.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
+    driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
+    
+    driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
+    driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.52));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
+    driverGamepad.povUp().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
+    driverGamepad.povUp().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
     //modes should function as such:
     //shoot mode: always aim the hood so its ready when r2 is pressed
     //feed mode: same but for feed aiming
