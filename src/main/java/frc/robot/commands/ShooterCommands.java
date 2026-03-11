@@ -87,7 +87,7 @@ public class ShooterCommands {
         TransferSubsystem transfer = TransferSubsystem.getInstance();
         Command loadBallsCommand = intake.intakeCommand().alongWith(floor.intakeCommand()).alongWith(new InstantCommand(transfer::setRunFull));
 
-        if (getTurnSpeed(drivebase, gamepad, goalPose) < 0.5) {
+        if (Math.abs(getTurnSpeed(drivebase, gamepad, goalPose)) < 0.5) {
             return driveFieldOrientedAnglularVelocity.alongWith(shootCommand).alongWith(loadBallsCommand);
         } else {
             return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
@@ -111,7 +111,7 @@ public class ShooterCommands {
         TransferSubsystem transfer = TransferSubsystem.getInstance();
         Command loadBallsCommand = intake.intakeCommand().alongWith(floor.intakeCommand()).alongWith(new InstantCommand(transfer::setRunFull));
 
-        if (getTurnSpeed(drivebase, gamepad, relativeGoalPose) < 0.5) {
+        if (Math.abs(getTurnSpeed(drivebase, gamepad, relativeGoalPose)) < 0.5) {
             return driveFieldOrientedAnglularVelocity.alongWith(shootCommand).alongWith(loadBallsCommand);
         } else {
             return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
