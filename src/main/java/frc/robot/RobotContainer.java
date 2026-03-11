@@ -36,7 +36,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
-import frc.robot.commands.ShooterUtils;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.FloorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -113,7 +113,7 @@ public class RobotContainer
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
     //driverGamepad.R2().and(driverGamepad.options())
-    //      .onTrue(ShooterUtils.getTurnAndDriveCommand(drivebase, driverGamepad, new Translation2d(4, 4)))
+    //      .onTrue(ShooterCommandss.getTurnAndDriveCommand(drivebase, driverGamepad, new Translation2d(4, 4)))
     //      .onFalse(driveCommand);//TODO: change to actual goal pose
 
     //Options - Zeros the robot heading
