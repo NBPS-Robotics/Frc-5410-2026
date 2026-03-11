@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -36,6 +37,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.FloorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -111,6 +113,9 @@ public class RobotContainer
     //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
+    //driverGamepad.R2().and(driverGamepad.options())
+    //      .onTrue(ShooterCommandss.getTurnAndDriveCommand(drivebase, driverGamepad, new Translation2d(4, 4)))
+    //      .onFalse(driveCommand);//TODO: change to actual goal pose
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
@@ -186,6 +191,28 @@ public class RobotContainer
 
     //also add shoot on the move toggle to the button panel along with overrides we may find we need later
 
+
+  }
+
+  public void configureBindingsShootOnTheMoveTest() {
+
+    Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
+    drivebase.setDefaultCommand(driveCommand);
+    driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+
+    Trigger autoTurning = driverGamepad.triangle().or(driverGamepad.cross());
+    driverGamepad.R2().onTrue(shooter.shootCommand());
+    driverGamepad.R2().negate().and(autoTurning.negate())
+          .onTrue(shooter.idleCommand());
+    driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand()));
+    driverGamepad.L2().negate().and(autoTurning.negate())
+          .onTrue(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
+          
+    driverGamepad.triangle().whileTrue(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+          .onFalse(driveCommand.alongWith(shooter.idleCommand()).alongWith(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand())));//TODO: change to actual goal pose
+    
+    driverGamepad.cross().whileTrue(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+          .onFalse(driveCommand.alongWith(shooter.idleCommand()).alongWith(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand())));//TODO: change to actual goal pose
 
   }
 
