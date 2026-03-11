@@ -84,12 +84,12 @@ public final class Constants {
     public static final int LCanId=10;
     public static final int RCanId=10;
     
-    public static final double p=0;
-    public static final double i=0;
+    public static final double p=0.0007;
+    public static final double i=0.004;
     public static final double d=0;
-    public static final double f=0;
+    public static final double f=0.00021;
 
-    public static final int motorSpeed = 5000;
+    public static final int motorSpeed = 4000;
   }
 
   public static final class ShooterConstants{
@@ -98,18 +98,18 @@ public final class Constants {
     public static final int L2CanId=9;
     public static final int R2CanId=7;
     
-    public static double pr=0.00005;
-    public static final double ir=0.000;
+    public static double pr=0.0008;
+    public static final double ir=0.001;
     public static final double dr=0.000;
-    public static double fr=0.000183;
+    public static double fr=0.000187;
 
-    public static double pl=0.00005;
-    public static final double il=0.000;
+    public static double pl=0.0008;
+    public static final double il=0.004;
     public static final double dl=0.000;
-    public static double fl=0.000190;
+    public static double fl=0.000195;
 
     public static final int feedSpeed = 2000;
-    public static final int shootSpeed = 1500;
+    public static final int shootSpeed = 1200;
     public static final int idleSpeed = 300;
 
     public static final int RServoPWMID = 1;
@@ -127,14 +127,14 @@ public final class Constants {
     public static final int canID2 = 14;
     public static final int pivotID = 12;
 
-    public static final double p=0;
+    public static final double p=0.1;
     public static final double i=0;
     public static final double d=0;
 
     public static final double tolerance=0;
 
-    public static final double deploy=0;
-    public static final double stow=0;
+    public static final double deploy=17.8;
+    public static final double stow=0.5;
 
     public static final double iZone=0;
 

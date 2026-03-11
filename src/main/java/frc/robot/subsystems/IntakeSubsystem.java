@@ -14,13 +14,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class IntakeSubsystem extends SubsystemBase{
 
     private SparkMax motor = new SparkMax(Constants.IntakeConstants.canID, MotorType.kBrushless);
     private SparkMax motor2 = new SparkMax(Constants.IntakeConstants.canID2, MotorType.kBrushless);
-    private SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
-
+    public SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
+    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
+    SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
+    SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
+    SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(sharedConfig).inverted(true);
     private static IntakeSubsystem intakeSingleton;
     public static IntakeSubsystem getInstance() {
         if (intakeSingleton==null) intakeSingleton = new IntakeSubsystem();
@@ -29,10 +33,7 @@ public class IntakeSubsystem extends SubsystemBase{
 
     @SuppressWarnings({"removal"})
     public IntakeSubsystem() {
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
-        SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
-        SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
-        SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(sharedConfig);
+       
         pivotConfig.closedLoop.outputRange(-1, 1)
                                     .pid(IntakeConstants.p, IntakeConstants.i, IntakeConstants.d)
                                     .iZone(IntakeConstants.iZone)
@@ -50,6 +51,16 @@ public class IntakeSubsystem extends SubsystemBase{
         pivot.getEncoder().setPosition(0);
     }
 
+    public void setBrake() {
+        pivotConfig.idleMode(IdleMode.kBrake);
+        pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    public void setCoast() {
+        pivotConfig.idleMode(IdleMode.kCoast);
+        pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
     public void deploy() {
         pivot.getClosedLoopController().setSetpoint(IntakeConstants.deploy, ControlType.kPosition);
     }
@@ -59,7 +70,7 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
     public boolean getAtPosistion(){
-        return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<=10;
+        return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<=1;
     }
 
     public Trigger atStow(){
@@ -87,12 +98,17 @@ public class IntakeSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Intake Pos", pivot.getEncoder().getPosition());
+        
     }
 
 
 
     public Command intakeCommand(){
         return this.runOnce(()->doIntake());
+    }
+
+    public Command zeroCommand(){
+        return this.runOnce(()->pivot.getEncoder().setPosition(0));
     }
 
     public Command outtakeCommand(){

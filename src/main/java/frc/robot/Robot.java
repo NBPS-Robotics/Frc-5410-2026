@@ -19,6 +19,8 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.SensorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -45,7 +47,7 @@ public class Robot extends TimedRobot
     m_gcTimer.start();
     addPeriodic(()->{
       SensorSubsystem.getInstance().updateAll();//all susbsystems that need pid should have the methods that
-      //TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+      TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
       ShooterSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
@@ -109,6 +111,7 @@ public class Robot extends TimedRobot
     m_robotContainer.setMotorBrake(true);
     disabledTimer.reset();
     disabledTimer.start();
+    IntakeSubsystem.getInstance().setCoast();
   }
 
   @Override
@@ -130,6 +133,7 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit()
   {
+    IntakeSubsystem.getInstance().setBrake();
     m_robotContainer.cancelResetOdometryFromVision();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -153,6 +157,7 @@ public class Robot extends TimedRobot
   @Override
   public void teleopInit()
   {
+    IntakeSubsystem.getInstance().setBrake();
     m_robotContainer.cancelResetOdometryFromVision();
 
     // This makes sure that the autonomous stops running when
@@ -180,6 +185,7 @@ public class Robot extends TimedRobot
   @Override
   public void testInit()
   {
+  IntakeSubsystem.getInstance().setBrake();
     m_robotContainer.cancelResetOdometryFromVision();
 
     // Cancels all running commands at the start of test mode.

@@ -133,6 +133,14 @@ public class ShooterSubsystem extends SubsystemBase{
         double lTopSet = (shooterPidL.getSetpoint()*ShooterConstants.fl)+shooterPidL.calculate(lTop.getEncoder().getVelocity());
         SmartDashboard.putNumber("lTop Power Set", lTopSet);
         lTop.set(lTopSet);
+        if(shooterPidL.getSetpoint()==ShooterConstants.shootSpeed&&lTop.getEncoder().getVelocity()-shooterPidL.getSetpoint()<-70){
+            lTop.set(1);
+            SmartDashboard.putBoolean("gofastL",true);
+        } else SmartDashboard.putBoolean("gofastL",false);
+        if(shooterPidR.getSetpoint()==ShooterConstants.shootSpeed&&rTop.getEncoder().getVelocity()-shooterPidR.getSetpoint()<-70){
+            rTop.set(1);
+            SmartDashboard.putBoolean("gofastR",true);
+        }else SmartDashboard.putBoolean("gofastR",false);
     }
 
     public Command runPidCommand(){
@@ -140,7 +148,7 @@ public class ShooterSubsystem extends SubsystemBase{
     }
     public void setHood(double val){
         hoodServoR.set(val);
-        hoodServoL.set(val);
+        hoodServoL.set(val+0.02);
     }
 
     public void telemetry(){

@@ -6,11 +6,12 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class TransferSubsystem extends SubsystemBase{
 
@@ -65,6 +66,16 @@ public class TransferSubsystem extends SubsystemBase{
 
     public void runPid(){
         rightTransfer.set((transferPid.getSetpoint()*Constants.TransferConstants.f)+transferPid.calculate(rightTransfer.getEncoder().getVelocity()));
+        if(transferPid.getSetpoint()==0)rightTransfer.set(0);
+    }
+
+    public void telemetry(){
+        SmartDashboard.putNumber("transfer speed",rightTransfer.getEncoder().getVelocity());
+    }
+
+    @Override
+    public void periodic(){
+        telemetry();
     }
 
     //commands
@@ -75,7 +86,7 @@ public class TransferSubsystem extends SubsystemBase{
         return this.runOnce(()->setStop());
     }
     public Command outtakeCommand(){
-        return this.runOnce(()->setOuttake());
+        return new ParallelCommandGroup(this.runOnce(()->setOuttake()), this.runOnce(()->transferPid.reset()));
     }
 
 }
