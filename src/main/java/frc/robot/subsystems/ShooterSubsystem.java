@@ -93,7 +93,7 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public boolean atSpeed(){
-        return (Math.abs(shooterPidL.getSetpoint()-lTop.getEncoder().getVelocity())<70)&&(Math.abs(shooterPidR.getSetpoint()-rTop.getEncoder().getVelocity())<70);
+        return (Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<70)&&(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<70);
     }
 
     public void addI(){
