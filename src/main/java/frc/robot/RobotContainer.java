@@ -174,7 +174,7 @@ public class RobotContainer
     driverGamepad.L2().onFalse(intake.stopCommand());
 
     //stow button
-    driverGamepad.L1().onTrue(new ParallelCommandGroup(
+    driverGamepad.L1().onTrue(new SequentialCommandGroup(
       intake.stowCommand(),
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
