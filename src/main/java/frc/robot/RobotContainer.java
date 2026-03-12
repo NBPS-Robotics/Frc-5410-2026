@@ -101,7 +101,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsPane2(); // testing code
+    configureBindingsCOMPETITION(); // testing code
 
     // Load interpolator files (if present)
     try {
@@ -155,7 +155,7 @@ public class RobotContainer
   }
 
   //comp bindings
-  private void configureBindingsPane2()
+  private void configureBindingsCOMPETITION()
   {
 
     // DRIVER CONTROLS:
@@ -185,10 +185,10 @@ public class RobotContainer
     driverGamepad.R1().onTrue(shooter.adjustHoodCommand(0.005));
     driverGamepad.povUp().onTrue(shooter.adjustHoodCommand(-0.005));
     
-    /*driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
+    driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
     driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.6));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
     driverGamepad.povUp().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
-    driverGamepad.povUp().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.77))*///TODO: Toggle feed mode, shooter modes should be a state machine
+    driverGamepad.povUp().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
     //modes should function as such:
     //shoot mode: always aim the hood so its ready when r2 is pressed
     //feed mode: same but for feed aiming
@@ -198,6 +198,36 @@ public class RobotContainer
     //also add shoot on the move toggle to the button panel along with overrides we may find we need later
 
 
+  }
+
+  private void configureBindingsHoodTuning() {
+
+    // DRIVER CONTROLS:
+
+    //Joysticks (Default) - Drive the robot
+    Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
+    drivebase.setDefaultCommand(driveCommand);
+
+    //Options - Zeros the robot heading
+    driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    
+    
+    driverGamepad.L2().onTrue(intake.defer(()->intake.smartIntakeCommand()));
+    driverGamepad.L2().onFalse(intake.stopCommand());
+    driverGamepad.cross().onTrue(intake.zeroCommand());
+
+    //stow button
+    driverGamepad.L1().onTrue(new SequentialCommandGroup(
+      intake.stowCommand(),
+      intake.intakeCommand()
+    )).onFalse(intake.stopCommand());
+
+    driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
+    driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
+    driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
+
+    driverGamepad.R1().onTrue(shooter.adjustHoodCommand(0.005));
+    driverGamepad.povUp().onTrue(shooter.adjustHoodCommand(-0.005));
   }
 
   private void configureBindingsPanelTest()
@@ -244,14 +274,14 @@ public class RobotContainer
     driverGamepad.R2().negate().and(autoTurning.negate())
           .onTrue(shooter.idleCommand());
     driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand()));
-    driverGamepad.L2().negate().and(autoTurning.negate())
+    driverGamepad.L2().negate()
           .onTrue(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
           
-    driverGamepad.triangle().whileTrue(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
-          .onFalse(driveCommand.alongWith(shooter.idleCommand()).alongWith(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand())));//TODO: change to actual goal pose
+    driverGamepad.triangle().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+          .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
     
-    driverGamepad.cross().whileTrue(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
-          .onFalse(driveCommand.alongWith(shooter.idleCommand()).alongWith(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand())));//TODO: change to actual goal pose
+    driverGamepad.cross().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+          .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
 
   }
 

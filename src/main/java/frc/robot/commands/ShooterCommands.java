@@ -52,23 +52,22 @@ public class ShooterCommands {
         Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
             () -> -gamepad.getLeftY(),
             () -> -gamepad.getLeftX(),
-            () -> getTurnSpeed(drivebase, gamepad, goalPose),
-            OIConstants.kDriveDeadband, OIConstants.kDriveDeadband);
+            () -> Math.cos(getTurnAngle(drivebase, gamepad, goalPose)),
+            () -> Math.sin(getTurnAngle(drivebase, gamepad, goalPose))
+        );
 
         return driveFieldOrientedAnglularVelocity;
 
     }
 
-    public static double getTurnSpeed(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
+    public static double getTurnAngle(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
         
         double dx = goalPose.getX() - drivebase.getPose().getX();
         double dy = goalPose.getY() - drivebase.getPose().getY();
 
         double desiredAngle = Math.atan2(dy, dx);
-        double currentAngle = drivebase.getPose().getRotation().getRadians();
-        double angleError = MathUtil.clamp(desiredAngle - currentAngle, -Math.PI, Math.PI);
-
-        return angleError * 1.0;
+        
+        return desiredAngle;
     }
 
     
@@ -76,25 +75,17 @@ public class ShooterCommands {
     public static Command getTurnDriveShootWhileAtRestCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
 
         Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
-            () -> 0,
-            () -> 0,
-            () -> getTurnSpeed(drivebase, gamepad, goalPose),
-            OIConstants.kDriveDeadband, OIConstants.kDriveDeadband);
+            () -> -gamepad.getLeftY(),
+            () -> -gamepad.getLeftX(),
+            () -> Math.cos(getTurnAngle(drivebase, gamepad, goalPose)),
+            () -> Math.sin(getTurnAngle(drivebase, gamepad, goalPose))
+        );
         
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-        Command shootCommand = shooter.shootCommand().alongWith(shooter.hoodCommand(hoodAngle(distance)));
+        Command shootCommand = shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance)));
 
-        IntakeSubsystem intake = IntakeSubsystem.getInstance();
-        FloorSubsystem floor = FloorSubsystem.getInstance();
-        TransferSubsystem transfer = TransferSubsystem.getInstance();
-        Command loadBallsCommand = intake.intakeCommand().alongWith(floor.intakeCommand()).alongWith(new InstantCommand(transfer::setRunFull));
-
-        if (Math.abs(getTurnSpeed(drivebase, gamepad, goalPose)) < 0.5) {
-            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand).alongWith(loadBallsCommand);
-        } else {
-            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
-        }
+        return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
     }
 
 
@@ -103,22 +94,17 @@ public class ShooterCommands {
 
         Translation2d relativeGoalPose = getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose);
 
-        Command driveCommand = new InstantCommand(()->getTurnAndDriveCommand(drivebase, gamepad, relativeGoalPose).execute());
-        driveCommand.addRequirements(drivebase);
-
+        Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
+            () -> -gamepad.getLeftY(),
+            () -> -gamepad.getLeftX(),
+            () -> Math.cos(getTurnAngle(drivebase, gamepad, relativeGoalPose)),
+            () -> Math.sin(getTurnAngle(drivebase, gamepad, relativeGoalPose))
+        );
+        
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         double distance = drivebase.getPose().getTranslation().getDistance(relativeGoalPose);
-        Command shootCommand = shooter.shootCommand().alongWith(shooter.hoodCommand(hoodAngle(distance)));
+        Command shootCommand = shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance)));
 
-        IntakeSubsystem intake = IntakeSubsystem.getInstance();
-        FloorSubsystem floor = FloorSubsystem.getInstance();
-        TransferSubsystem transfer = TransferSubsystem.getInstance();
-        Command loadBallsCommand = intake.intakeCommand().alongWith(floor.intakeCommand()).alongWith(new InstantCommand(transfer::setRunFull));
-
-        if (Math.abs(getTurnSpeed(drivebase, gamepad, relativeGoalPose)) < 0.5) {
-            return driveCommand.alongWith(shootCommand).alongWith(loadBallsCommand);
-        } else {
-            return driveCommand.alongWith(shootCommand);
-        }
+        return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
     }
 }
