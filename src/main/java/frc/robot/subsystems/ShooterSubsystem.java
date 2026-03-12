@@ -152,6 +152,9 @@ public class ShooterSubsystem extends SubsystemBase{
         hoodServoR.set(val);
         hoodServoL.set(val+0.02);
     }
+    public void changeHood(double increment){
+        setHood(hoodServoR.getPosition()+increment);
+    }
     public boolean isShootMode(){
         return hoodServoR.getPosition()==(0.6)||hoodServoR.getPosition()==(0.77);
     }
@@ -191,6 +194,9 @@ public class ShooterSubsystem extends SubsystemBase{
     }
     public Command hoodCommand(double val){
         return this.runOnce(()->setHood(val));
+    }
+    public Command adjustHoodCommand(double increment){
+        return this.runOnce(()->changeHood(increment));
     }
 
 }
