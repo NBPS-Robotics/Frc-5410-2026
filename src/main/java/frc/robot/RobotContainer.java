@@ -5,6 +5,8 @@
 package frc.robot;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -37,6 +39,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.robot.commands.UtilCommands.OpCommands;
 import frc.robot.commands.UtilCommands.WaitCommand;
+import frc.robot.commands.Interpolator;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.FloorSubsystem;
@@ -93,13 +96,23 @@ public class RobotContainer
    */
   public RobotContainer()
   {
-    // Register commands for PathPlanner
-    registerNamedCommands();
+    
     //configureBindingsPanel(); // testing code
     configureBindingsPane2(); // testing code
 
+    try {
+      Interpolator.loadFiles(
+        new File(Filesystem.getDeployDirectory(), "HoodData.txt"),
+        new File(Filesystem.getDeployDirectory(), "ShootTimeData.txt")
+      );
+    } catch (IOException e) {
+      e.printStackTrace();
+      Interpolator.failed();
+    }
+
+    // Register commands for PathPlanner
+    registerNamedCommands();
     setAutoCommands();
-    
     SmartDashboard.putData("Autos", autoChooser);
   }
 
@@ -295,6 +308,8 @@ public class RobotContainer
       SmartDashboard.putNumber("module offset "+i,Math.abs(module.getAbsoluteEncoder().getAbsolutePosition()-module.getState().angle.getDegrees()));
       i++;
     }
+
+    SmartDashboard.putBoolean("Interpolator Failed Load?", Interpolator.hasFailed());
     
     /* double goToStow = SmartDashboard.getNumber("Go to stow", 0);
     if (goToStow > 0.001) dashboardStowCommand.schedule();
