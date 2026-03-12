@@ -96,10 +96,14 @@ public class RobotContainer
    */
   public RobotContainer()
   {
-    
+    // Register commands for PathPlanner
+    registerNamedCommands();
+
+    // Input bindings
     //configureBindingsPanel(); // testing code
     configureBindingsPane2(); // testing code
 
+    // Load interpolator files (if present)
     try {
       Interpolator.loadFiles(
         new File(Filesystem.getDeployDirectory(), "HoodData.txt"),
@@ -110,8 +114,6 @@ public class RobotContainer
       Interpolator.failed();
     }
 
-    // Register commands for PathPlanner
-    registerNamedCommands();
     setAutoCommands();
     SmartDashboard.putData("Autos", autoChooser);
   }
@@ -133,7 +135,7 @@ public class RobotContainer
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
     
     driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
-    driverGamepad.L1().onTrue(shooter.hoodCommand(0.52));
+    driverGamepad.L1().onTrue(shooter.hoodCommand(0.7));
     driverGamepad.R1().onTrue(shooter.hoodCommand(0.77));
 
     driverGamepad.povDown().onTrue(transfer.stopCommand());
@@ -185,6 +187,7 @@ public class RobotContainer
       intake.intakeCommand()
     ));
     driverGamepad.L2().onFalse(intake.stopCommand());
+    driverGamepad.cross().onTrue(intake.zeroCommand());
 
     //stow button
     driverGamepad.L1().onTrue(new SequentialCommandGroup(
@@ -192,12 +195,12 @@ public class RobotContainer
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
 
-    driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand(),intake.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
+    driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
     driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
-    driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand(),shooter.stopCommand()));
+    driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
     
     driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
-    driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.52));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
+    driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.6));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
     driverGamepad.povUp().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
     driverGamepad.povUp().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
     //modes should function as such:
@@ -209,6 +212,39 @@ public class RobotContainer
     //also add shoot on the move toggle to the button panel along with overrides we may find we need later
 
 
+  }
+
+  private void configureBindingsPanelTest()
+  {
+
+    // DRIVER CONTROLS:
+
+    //Joysticks (Default) - Drive the robot
+    Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
+    drivebase.setDefaultCommand(driveCommand);
+    shooter.runPidCommand();
+    //shooter.setDefaultCommand(shooter.runPidCommand());
+
+    //Options - Zeros the robot heading
+    driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    driverGamepad.L1().onTrue(shooter.hoodCommand(0.6));
+    driverGamepad.R1().onTrue(shooter.hoodCommand(0.77));
+    driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
+
+    driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreasePL));
+    driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreasePL));
+    driverGamepad.povLeft().onTrue(new InstantCommand(shooter::setDecreaseFL));
+    driverGamepad.povRight().onTrue(new InstantCommand(shooter::setIncreaseFL));
+
+    driverGamepad.cross().onTrue(new InstantCommand(shooter::setDecreasePR));
+    driverGamepad.triangle().onTrue(new InstantCommand(shooter::setIncreasePR));
+    driverGamepad.square().onTrue(new InstantCommand(shooter::setDecreaseFR));
+    driverGamepad.circle().onTrue(new InstantCommand(shooter::setIncreaseFR));
+
+    //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
+    //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
+    driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRun),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
+    //driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
   }
 
   public void configureBindingsShootOnTheMoveTest() {

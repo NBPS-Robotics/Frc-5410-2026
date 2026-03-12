@@ -58,8 +58,7 @@ public class ShooterSubsystem extends SubsystemBase{
             lBottom.configure(left2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
 
-        hoodServoR.set(0.60);
-        hoodServoL.set(0.60);
+        setHood(0.6);
     }
 
     public void setIncreasePR(){
@@ -93,7 +92,7 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public boolean atSpeed(){
-        return (Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<70)&&(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<70);
+        return (Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<120)&&(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120);
     }
 
     public void addI(){
@@ -154,7 +153,7 @@ public class ShooterSubsystem extends SubsystemBase{
         hoodServoL.set(val+0.02);
     }
     public boolean isShootMode(){
-        return hoodServoR.getPosition()==(0.52)||hoodServoR.getPosition()==(0.77);
+        return hoodServoR.getPosition()==(0.6)||hoodServoR.getPosition()==(0.77);
     }
 
     public void telemetry(){
