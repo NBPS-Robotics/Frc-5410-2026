@@ -125,7 +125,7 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int canID = 13;
     public static final int canID2 = 14;
-    public static final int pivotID = 12;
+    public static final int pivotID = 33;
 
     public static final double p=0.1;
     public static final double i=0;

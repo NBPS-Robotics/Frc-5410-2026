@@ -182,8 +182,8 @@ public class RobotContainer
     driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
     driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
 
-    driverGamepad.R1().onTrue(shooter.adjustHoodCommand(0.005));
-    driverGamepad.povUp().onTrue(shooter.adjustHoodCommand(-0.005));
+    //driverGamepad.R1().onTrue(shooter.adjustHoodCommand(0.005));
+    //driverGamepad.povUp().onTrue(shooter.adjustHoodCommand(-0.005));
     
     driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
     driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.6));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
