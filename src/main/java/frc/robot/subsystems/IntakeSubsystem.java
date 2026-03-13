@@ -30,6 +30,7 @@ public class IntakeSubsystem extends SubsystemBase{
     SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
     SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
     SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(sharedConfig).inverted(true);
+    private boolean stow=false;
     private static IntakeSubsystem intakeSingleton;
     public static IntakeSubsystem getInstance() {
         if (intakeSingleton==null) intakeSingleton = new IntakeSubsystem();
@@ -71,18 +72,19 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
      public void stow() {
+        stow=true;
         pivot.getClosedLoopController().setSetpoint(IntakeConstants.stow, ControlType.kPosition);
     }
 
     public boolean getAtPosistion(){
-        return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<=1;
+        return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<1;
     }
 
     public Trigger atStow(){
-        return new Trigger(()->getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.stow);
+        return new Trigger(()->(getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.stow));
     }
     public Trigger atDeploy(){
-        return new Trigger(()->getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.deploy);
+        return new Trigger(()->(getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.deploy));
     }
 
     public void doIntake() {
@@ -102,8 +104,11 @@ public class IntakeSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Intake Pos", pivot.getEncoder().getPosition());
-        
+        //SmartDashboard.putNumber("Intake Pos", pivot.getEncoder().getPosition());
+       // SmartDashboard.putBoolean("at stow", atStow().getAsBoolean());
+       // SmartDashboard.putBoolean("at stow", getAtPosistion());
+        //SmartDashboard.putNumber("setpoint", pivot.getClosedLoopController().getSetpoint());
+       // SmartDashboard.putNumber("dist to position", Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition()));
     }
 
 
