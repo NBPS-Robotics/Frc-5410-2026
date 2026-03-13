@@ -29,7 +29,7 @@ public class ShooterCommands {
         Translation2d vel = new Translation2d(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond);
         Translation2d G = goalPose;
         for (int i = 0; i < 10; i++) {
-            double distance = robotPose.getTranslation().getDistance(goalPose);
+            double distance = robotPose.getTranslation().getDistance(G);
             G = goalPose.minus(vel.times(timeToGoal(distance)));
         }
         return G;
@@ -38,11 +38,11 @@ public class ShooterCommands {
     //should return seconds to reach goal
     //used in getRelativeGoalPose
     public static double timeToGoal(double distance) {
-        return 0;
+        return Interpolator.interpolate(distance, Interpolator.DataType.SHOT_TIME);
     }
 
     public static double hoodAngle(double distance) {
-        return 0;
+        return Interpolator.interpolate(distance, Interpolator.DataType.HOOD);
     }
 
 

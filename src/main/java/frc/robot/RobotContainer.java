@@ -276,11 +276,11 @@ public class RobotContainer
     driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand()));
     driverGamepad.L2().negate()
           .onTrue(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
-          
-    driverGamepad.triangle().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+    
+    driverGamepad.triangle().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4.6, 4))))
           .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
     
-    driverGamepad.cross().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+    driverGamepad.cross().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4.6, 4))))
           .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
 
   }
