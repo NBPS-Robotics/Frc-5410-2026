@@ -18,6 +18,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.Constants;
 
 public class ShooterCommands {
 
@@ -42,7 +43,7 @@ public class ShooterCommands {
     }
 
     public static double hoodAngle(double distance) {
-        return Interpolator.interpolate(distance, Interpolator.DataType.HOOD);
+        return 0.02607*distance + 0.46286;
     }
 
 
@@ -70,6 +71,18 @@ public class ShooterCommands {
         return desiredAngle;
     }
 
+    public static double getTurnSpeed(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
+        
+        double dx = goalPose.getX() - drivebase.getPose().getX();
+        double dy = goalPose.getY() - drivebase.getPose().getY();
+
+        double desiredAngle = Math.atan2(dy, dx);
+        double currentAngle = drivebase.getPose().getRotation().getRadians();
+        double angleError = MathUtil.clamp(desiredAngle - currentAngle, -Math.PI, Math.PI);
+
+        return angleError * 1.0;
+    }
+
     
 
     public static Command getTurnDriveShootWhileAtRestCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
@@ -77,17 +90,16 @@ public class ShooterCommands {
         Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
             () -> -gamepad.getLeftY(),
             () -> -gamepad.getLeftX(),
-            () -> Math.cos(getTurnAngle(drivebase, gamepad, goalPose)),
-            () -> Math.sin(getTurnAngle(drivebase, gamepad, goalPose))
-        );
+            () -> getTurnSpeed(drivebase, gamepad, goalPose),
+            OIConstants.kDriveDeadband, OIConstants.kDriveDeadband);
         
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
-        Command shootCommand = new RunCommand(()-> {
-            double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-            shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance)));
-        }, shooter);
+        double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
+        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance))});
 
-        return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
+        
+            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
+    
     }
 
 

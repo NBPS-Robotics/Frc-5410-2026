@@ -98,18 +98,18 @@ public final class Constants {
     public static final int L2CanId=9;
     public static final int R2CanId=7;
     
-    public static double pr=0.00006;
+    public static double pr=0.0004;
     public static final double ir=0.000;
     public static final double dr=0.00005;
-    public static double fr=0.000178;
+    public static double fr=0.000176;
 
-    public static double pl=0.0006;
+    public static double pl=0.0004;
     public static final double il=0.000;
     public static final double dl=0.00005;
-    public static double fl=0.000185;
+    public static double fl=0.000183;
 
     public static final int feedSpeed = 2000;
-    public static final int shootSpeed = 1500;
+    public static final int shootSpeed = 1400;
     public static final int idleSpeed = 300;
 
     public static final int RServoPWMID = 1;
@@ -119,7 +119,7 @@ public final class Constants {
   public static final class FloorConstants {
     public static final int canID = 11;
 
-    public static final double motorSpeed = 1;
+    public static final double motorSpeed = 0.75;
   }
 
   public static final class IntakeConstants {
@@ -134,7 +134,7 @@ public final class Constants {
     public static final double tolerance=0;
 
     public static final double deploy=17.8;
-    public static final double stow=0.5;
+    public static final double stow=2;
 
     public static final double iZone=0;
 

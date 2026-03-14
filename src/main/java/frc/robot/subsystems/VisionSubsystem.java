@@ -35,7 +35,7 @@ public class VisionSubsystem extends SubsystemBase{
     public double resetOdomAt = -10;
 
     private static final String fLimeName = "limelight-limef";
-    private static final String bLimeName = "limelight";
+    private static final String bLimeName = "limelight-limeb";
 
     private static final String fPoseName = "FLpose";
     private static final String bPoseName = "BLpose";
@@ -321,12 +321,12 @@ public class VisionSubsystem extends SubsystemBase{
         if (poseEstimate == null) return null;
             
             double tagMin = 1;
-            double tagMax = 2;
+            double tagMax = 5;
             double minArea = 0.08;
             if (poseEstimate.tagCount == 1) minArea = 0.18;
             if (poseEstimate.tagCount > tagMax || poseEstimate.tagCount < tagMin) return null;
             if (poseEstimate.avgTagArea < minArea) return null;
-            if (poseEstimate.avgTagDist > 3.25) return null;
+            if (poseEstimate.avgTagDist > 8) return null;
             if(poseEstimate.rawFiducials[0].ambiguity > .65)return null;
             return poseEstimate;
         

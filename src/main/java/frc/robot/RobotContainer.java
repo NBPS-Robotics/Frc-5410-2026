@@ -101,7 +101,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsHoodTuning(); // testing code
+    configureBindingsShootOnTheMoveTest(); // testing code
 
     // Load interpolator files (if present)
     try {
@@ -270,18 +270,28 @@ public class RobotContainer
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
 
     Trigger autoTurning = driverGamepad.triangle().or(driverGamepad.cross());
-    driverGamepad.R2().onTrue(shooter.shootCommand());
-    driverGamepad.R2().negate().and(autoTurning.negate())
-          .onTrue(shooter.idleCommand());
-    driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand(),intake.intakeCommand()));
-    driverGamepad.L2().negate()
-          .onTrue(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
+
+    driverGamepad.L2().onTrue(intake.defer(()->intake.smartIntakeCommand()));
+    driverGamepad.L2().onFalse(intake.stopCommand());
+    driverGamepad.cross().onTrue(intake.zeroCommand());
+
+    //stow button
+    driverGamepad.L1().onTrue(new SequentialCommandGroup(
+      intake.stowCommand(),
+      intake.intakeCommand()
+    )).onFalse(intake.stopCommand());
+
+    driverGamepad.R1().onTrue(shooter.adjustHoodCommand(0.005));
+    driverGamepad.povUp().onTrue(shooter.adjustHoodCommand(-0.005));
+
+    driverGamepad.R2().whileTrue(new ParallelCommandGroup(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4.6, 4)))))
+          .onFalse(OpCommands.getDriveCommand(drivebase, driverGamepad).alongWith(shooter.idleCommand()));
+          
+    driverGamepad.triangle().onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()))
+          .onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));//TODO: change to actual goal pose
     
-    driverGamepad.triangle().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileAtRestCommand(drivebase, driverGamepad, new Translation2d(4.6, 4))))
-          .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
-    
-    driverGamepad.cross().onTrue(shooter.defer(()->ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4.6, 4))))
-          .onFalse(driveCommand.alongWith(shooter.idleCommand()));//TODO: change to actual goal pose
+    //driverGamepad.cross().whileTrue(new RepeatCommand(ShooterCommands.getTurnDriveShootWhileMovingCommand(drivebase, driverGamepad, new Translation2d(4, 4))))
+    //      .onFalse(driveCommand.alongWith(shooter.idleCommand()).alongWith(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand())));//TODO: change to actual goal pose
 
   }
 
@@ -362,6 +372,7 @@ public class RobotContainer
     }
 
     SmartDashboard.putBoolean("Interpolator Failed Load?", Interpolator.hasFailed());
+    SmartDashboard.putNumber("Distance to Goal", drivebase.getPose().getTranslation().getDistance(new Translation2d(4.6,4)));
     
     /* double goToStow = SmartDashboard.getNumber("Go to stow", 0);
     if (goToStow > 0.001) dashboardStowCommand.schedule();
