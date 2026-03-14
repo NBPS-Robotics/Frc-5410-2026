@@ -101,7 +101,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsCOMPETITION(); // testing code
+    configureBindingsHoodTuning(); // testing code
 
     // Load interpolator files (if present)
     try {

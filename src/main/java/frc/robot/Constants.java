@@ -98,15 +98,15 @@ public final class Constants {
     public static final int L2CanId=9;
     public static final int R2CanId=7;
     
-    public static double pr=0.0008;
+    public static double pr=0.00006;
     public static final double ir=0.000;
     public static final double dr=0.00005;
-    public static double fr=0.00019;
+    public static double fr=0.000178;
 
     public static double pl=0.0006;
     public static final double il=0.000;
     public static final double dl=0.00005;
-    public static double fl=0.0002;
+    public static double fl=0.000185;
 
     public static final int feedSpeed = 2000;
     public static final int shootSpeed = 1500;
