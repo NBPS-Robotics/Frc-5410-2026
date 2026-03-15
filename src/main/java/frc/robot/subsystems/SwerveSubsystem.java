@@ -532,7 +532,7 @@ public class SwerveSubsystem extends SubsystemBase
     });
   }
 
-  private static double[] deadband2d(double x, double y, double deadband) {
+  public static double[] deadband2d(double x, double y, double deadband) {
     double mag = Math.hypot(x, y);
     double newMagFactor = 0;
     if (mag >= 1.0) {

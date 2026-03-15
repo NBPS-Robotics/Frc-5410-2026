@@ -18,6 +18,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import swervelib.math.SwerveMath;
 import frc.robot.Constants;
 
 public class ShooterCommands {
@@ -95,10 +96,9 @@ public class ShooterCommands {
         
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance))});
+        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(Constants.ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance));});
 
-        
-            return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
+        return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
     
     }
 
@@ -120,5 +120,79 @@ public class ShooterCommands {
         }, shooter);
 
         return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
+    }
+
+
+
+    private static boolean autoTurnEnabled = true;
+    public static void toggleAutoTurn() {
+        autoTurnEnabled = !autoTurnEnabled;
+    }
+
+    public static class TurnAndShootCommand extends Command {
+
+        FloorSubsystem floor;
+        TransferSubsystem transfer;
+        ShooterSubsystem shooter;
+        SwerveSubsystem drivebase;
+        CommandPS5Controller gamepad;
+
+        boolean doLoading;
+        Translation2d goalPose = new Translation2d(4.6, 4);
+
+        public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
+            floor = FloorSubsystem.getInstance();
+            transfer = TransferSubsystem.getInstance();
+            shooter = ShooterSubsystem.getInstance();
+            drivebase = p_drivebase;
+            gamepad = p_gamepad;
+            addRequirements(floor, transfer, shooter, drivebase);
+            doLoading = false;
+        }
+
+        @Override
+        public void initialize() {
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            floor.stopFloor();
+            transfer.setStop();
+
+            doLoading = false;
+        }
+
+        @Override
+        public void execute() {
+            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
+            double angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, goalPose) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
+                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
+                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
+                                true,
+                                true
+            );
+            
+            double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
+            shooter.setHood(hoodAngle(distance));
+            
+            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                doLoading = true;
+            }
+            if (doLoading) {
+                floor.doFloorIntake();
+                transfer.setRun();
+            }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            floor.stopFloor();
+            transfer.setStop();
+            shooter.setIdle();
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
     }
 }
