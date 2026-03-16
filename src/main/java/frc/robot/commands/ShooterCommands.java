@@ -43,8 +43,8 @@ public class ShooterCommands {
         return Interpolator.interpolate(distance, Interpolator.DataType.SHOT_TIME);
     }
 
-    public static double hoodAngle(double distance) {
-        return 0.02607*distance + 0.46286;
+    public static double hoodAngle(double distance, boolean normalSpeed) {
+        return normalSpeed ? 0.02607*distance + 0.46286 : 0.02607*distance + 0.46286;
     }
 
 
@@ -96,7 +96,7 @@ public class ShooterCommands {
         
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(Constants.ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance));});
+        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(Constants.ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance, true));});
 
         return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
     
@@ -116,7 +116,7 @@ public class ShooterCommands {
         ShooterSubsystem shooter = ShooterSubsystem.getInstance();
         Command shootCommand = new RunCommand(()-> {
             double distance = drivebase.getPose().getTranslation().getDistance(getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose));
-            shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance)));
+            shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance, true)));
         }, shooter);
 
         return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
@@ -172,7 +172,18 @@ public class ShooterCommands {
             );
             
             double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-            shooter.setHood(hoodAngle(distance));
+            if (distance < 2.4 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConst) {
+                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
+                Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
+                Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
+                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            } else if (distance > 2.9 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConstLow) {
+                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
+                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            }
+            shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed==Constants.ShooterConstants.shootSpeedConst));
             
             if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
                 doLoading = true;
