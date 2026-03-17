@@ -58,8 +58,7 @@ import swervelib.SwerveModule;
 public class RobotContainer
 {
   // The robot's subsystems and commands are defined here...
-  public final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                         "swerve"));
+  public final SwerveSubsystem drivebase = SwerveSubsystem.getInstance();
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
   public final TransferSubsystem transfer=TransferSubsystem.getInstance();
   public final ShooterSubsystem shooter=ShooterSubsystem.getInstance();
@@ -101,7 +100,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsShootOnTheMoveTest(); // testing code
+    configureBindingsCOMPETITION(); // testing code
 
     // Load interpolator files (if present)
     try {
@@ -135,15 +134,18 @@ public class RobotContainer
       intake.stowCommand(),
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
+    driverGamepad.povDown().onTrue(new SequentialCommandGroup(intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand())).onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
 
-    driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
-    driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
-    driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
-    
-    driverGamepad.R1().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
-    driverGamepad.R1().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.6));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
-    driverGamepad.povUp().and(()->shooter.isShootMode()).onTrue(shooter.hoodCommand(0.49));
-    driverGamepad.povUp().and(()->!shooter.isShootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
+    // driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
+    // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
+    // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
+    driverGamepad.R2().whileTrue(new ParallelCommandGroup(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad),new InstantCommand(()->shooter.shootMode=true)));
+    driverGamepad.R1().and(()->!shooter.shootMode).onTrue(new InstantCommand(()->shooter.shootMode=true));
+    driverGamepad.R1().and(()->shooter.shootMode).onTrue(new SequentialCommandGroup(new InstantCommand(()->shooter.shootMode=false),shooter.hoodCommand(0.49)));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
+//    driverGamepad.R1().onTrue(ShooterCommands.aimHoodCommand());
+
+    // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
+    // driverGamepad.povUp().and(()->!shooter.shootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
     //modes should function as such:
     //shoot mode: always aim the hood so its ready when r2 is pressed
     //feed mode: same but for feed aiming

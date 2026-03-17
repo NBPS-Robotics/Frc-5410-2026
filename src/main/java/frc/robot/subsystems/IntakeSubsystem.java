@@ -45,11 +45,11 @@ public class IntakeSubsystem extends SubsystemBase{
                                     .iZone(IntakeConstants.iZone)
                                     .maxMotion.allowedClosedLoopError(IntakeConstants.tolerance);
 
-        for (int i = 0; i<=5; i++) {
+        //for (int i = 0; i<=5; i++) {
             motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             motor2.configure(motor2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        }
+        //}
     }
 
 

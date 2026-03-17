@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
-
+import edu.wpi.first.wpilibj.Filesystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -54,8 +54,15 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+
 public class SwerveSubsystem extends SubsystemBase
 {
+  private static SwerveSubsystem SwerveSingleton;
+    public static SwerveSubsystem getInstance() {
+        if (SwerveSingleton==null) SwerveSingleton = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
+                                                                         "swerve"));
+        return SwerveSingleton;
+    }
 
   /**
    * Swerve drive object.
@@ -664,7 +671,7 @@ public class SwerveSubsystem extends SubsystemBase
    *
    * @return true if the red alliance, false if blue. Defaults to false if none is available.
    */
-  private boolean isRedAlliance()
+  public boolean isRedAlliance()
   {
     var alliance = DriverStation.getAlliance();
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;

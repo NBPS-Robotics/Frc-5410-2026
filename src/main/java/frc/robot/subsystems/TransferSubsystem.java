@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class TransferSubsystem extends SubsystemBase{
@@ -86,7 +87,7 @@ public class TransferSubsystem extends SubsystemBase{
         return this.runOnce(()->setStop());
     }
     public Command outtakeCommand(){
-        return new ParallelCommandGroup(this.runOnce(()->setOuttake()), this.runOnce(()->transferPid.reset()));
+        return new SequentialCommandGroup(this.runOnce(()->setOuttake()), this.runOnce(()->transferPid.reset()));
     }
 
 }

@@ -6,7 +6,10 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
+import frc.robot.subsystems.SwerveSubsystem;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.commands.ShooterCommands;
 
 public class ShooterSubsystem extends SubsystemBase{
 
@@ -149,15 +153,18 @@ public class ShooterSubsystem extends SubsystemBase{
         return new InstantCommand(()->runPid(),this);
     }
     public void setHood(double val){
+        if(val>=0.7){
         hoodServoR.set(val);
         hoodServoL.set(val+0.02);
+        }else{
+        hoodServoR.set(0.7);
+        hoodServoL.set(0.72);
+        }
     }
     public void changeHood(double increment){
         setHood(hoodServoR.getPosition()+increment);
     }
-    public boolean isShootMode(){
-        return hoodServoR.getPosition()==(0.6)||hoodServoR.getPosition()==(0.77);
-    }
+    public boolean shootMode=false;
 
     public void telemetry(){
       SmartDashboard.putNumber("pr",shooterPidR.getP());
@@ -177,6 +184,20 @@ public class ShooterSubsystem extends SubsystemBase{
     @Override
     public void periodic(){
         telemetry();
+        if(shootMode){
+        SwerveSubsystem drivebase = SwerveSubsystem.getInstance();
+        Pose2d botPose=drivebase.getPose();
+        Translation2d goalPose=null;
+        if(drivebase.isRedAlliance()&&botPose.getX()>11.85)goalPose = new Translation2d(11.920, 4.04);
+        else if(drivebase.isRedAlliance()&&botPose.getX()<=11.85&&botPose.getY()>=4.04)goalPose = new Translation2d(15, 7);
+        else if(drivebase.isRedAlliance()&&botPose.getX()<=11.85&&botPose.getY()<4.04)goalPose = new Translation2d(15, 1.5);
+        else if(drivebase.isRedAlliance()&&botPose.getX()<4.65)goalPose = new Translation2d(4.60, 4.04);
+        else if(drivebase.isRedAlliance()&&botPose.getX()>=4.65&&botPose.getY()>=4.04)goalPose = new Translation2d(2, 7);
+        else goalPose = new Translation2d(2, 1.5);
+        
+         double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
+         setHood(ShooterCommands.hoodAngle(distance,Constants.ShooterConstants.shootSpeed==Constants.ShooterConstants.shootSpeedConst));
+        }
     }
 
     //commands

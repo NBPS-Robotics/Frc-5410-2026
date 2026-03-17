@@ -129,32 +129,56 @@ public class ShooterCommands {
         autoTurnEnabled = !autoTurnEnabled;
     }
 
+    // public Command aimHoodCommand(){
+    //     ShooterSubsystem shooter = ShooterSubsystem.getInstance();
+    //     SwerveSubsystem drivebase = drivebase
+    //     Translation2d goalPose = new Translation2d(4.6, 4);
+    //     double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
+    //     return this.runOnce(()->shooter.setHood(hoodAngle(distance)));
+    // }
+
     public static class TurnAndShootCommand extends Command {
 
         FloorSubsystem floor;
         TransferSubsystem transfer;
         ShooterSubsystem shooter;
-        SwerveSubsystem drivebase;
+        SwerveSubsystem drivebase=SwerveSubsystem.getInstance();
         CommandPS5Controller gamepad;
+        Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
-        Translation2d goalPose = new Translation2d(4.6, 4);
-
+        Translation2d goalPose;
         public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
             transfer = TransferSubsystem.getInstance();
             shooter = ShooterSubsystem.getInstance();
             drivebase = p_drivebase;
             gamepad = p_gamepad;
-            addRequirements(floor, transfer, shooter, drivebase);
-            doLoading = false;
-        }
+
+            botPose = drivebase.getPose();
+
+            if (drivebase.isRedAlliance() && botPose.getX() > 11.85)
+                    goalPose = new Translation2d(11.920, 4.04);
+            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() >= 4.04)
+                    goalPose = new Translation2d(15, 7);
+            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() < 4.04)
+                    goalPose = new Translation2d(15, 1.5);
+            else if (drivebase.isRedAlliance() && botPose.getX() < 4.65)
+                    goalPose = new Translation2d(4.60, 4.04);
+            else if (drivebase.isRedAlliance() && botPose.getX() >= 4.65 && botPose.getY() >= 4.04)
+                    goalPose = new Translation2d(2, 7);
+            else
+                    goalPose = new Translation2d(2, 1.5);
+
+    addRequirements(floor, transfer, shooter, drivebase);
+    doLoading = false;
+}
 
         @Override
         public void initialize() {
             shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            floor.stopFloor();
-            transfer.setStop();
+            //floor.stopFloor();
+            //transfer.setStop();
 
             doLoading = false;
         }
@@ -177,7 +201,7 @@ public class ShooterCommands {
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
                 shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            } else if (distance > 2.9 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConstLow) {
+            } else if (distance >= 2.4 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConstLow) {
                 Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
