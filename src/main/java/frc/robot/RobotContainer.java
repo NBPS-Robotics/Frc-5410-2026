@@ -9,9 +9,13 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.jar.Attributes.Name;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,6 +61,7 @@ import swervelib.SwerveModule;
  */
 public class RobotContainer
 {
+  SendableChooser<Command> AutoChooser = new SendableChooser<>();
   // The robot's subsystems and commands are defined here...
   public final SwerveSubsystem drivebase = SwerveSubsystem.getInstance();
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
@@ -228,9 +233,7 @@ public class RobotContainer
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected(); 
-  }
+  
 
   private static double normalDegrees(double deg) {
     double mod = deg % 360.0;
@@ -238,17 +241,23 @@ public class RobotContainer
     return mod;
   }
   
-  public void setAutoCommands(){//TODO:Autos
-   // autoChooser = AutoBuilder.buildAutoChooser();
+  public Command getAutonomousCommand() {
+    return AutoChooser.getSelected(); 
+  }
 
-    PIDController turnController = new PIDController(DriveConstants.kTurningP, DriveConstants.kTurningI, DriveConstants.kTurningD);
-    turnController.setIZone(DriveConstants.kTurningIZone);
-    turnController.enableContinuousInput(0, 360);
-    turnController.setSetpoint(0);
+  public void setAutoCommands(){
+    AutoChooser.addOption("BlueHumanPlayer", new PathPlannerAuto("BlueHumanPlayer"));
+    AutoChooser.addOption("BlueHumanPlayerSimple", new PathPlannerAuto("BlueHumanPlayerSimple"));
+    AutoChooser.addOption("BlueTrough", new PathPlannerAuto("BlueTrough"));
+    AutoChooser.addOption("BlueTroughSimple", new PathPlannerAuto("BlueTroughSimple"));
+    AutoChooser.addOption("CenterAuto", new PathPlannerAuto("CenterAuto"));
+    AutoChooser.addOption("CenterAutoSimple", new PathPlannerAuto("CenterAutoSimple"));
   }
 
   public void registerNamedCommands() {//TODO:autos here
-    
+    NamedCommands.registerCommand("Deploy Intake", intake.deployCommand());
+    NamedCommands.registerCommand("Stow Intake", intake.stowCommand());
+    NamedCommands.registerCommand("Turn And Shoot", new ShooterCommands.TurnAndShootInAutoCommand(drivebase));
   }
 
   public void setDriveMode()

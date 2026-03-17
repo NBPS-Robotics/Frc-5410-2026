@@ -184,20 +184,6 @@ public class ShooterSubsystem extends SubsystemBase{
     @Override
     public void periodic(){
         telemetry();
-        if(shootMode){
-        SwerveSubsystem drivebase = SwerveSubsystem.getInstance();
-        Pose2d botPose=drivebase.getPose();
-        Translation2d goalPose=null;
-        if(drivebase.isRedAlliance()&&botPose.getX()>11.85)goalPose = new Translation2d(11.920, 4.04);
-        else if(drivebase.isRedAlliance()&&botPose.getX()<=11.85&&botPose.getY()>=4.04)goalPose = new Translation2d(15, 7);
-        else if(drivebase.isRedAlliance()&&botPose.getX()<=11.85&&botPose.getY()<4.04)goalPose = new Translation2d(15, 1.5);
-        else if(drivebase.isRedAlliance()&&botPose.getX()<4.65)goalPose = new Translation2d(4.60, 4.04);
-        else if(drivebase.isRedAlliance()&&botPose.getX()>=4.65&&botPose.getY()>=4.04)goalPose = new Translation2d(2, 7);
-        else goalPose = new Translation2d(2, 1.5);
-        
-         double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-         setHood(ShooterCommands.hoodAngle(distance,Constants.ShooterConstants.shootSpeed==Constants.ShooterConstants.shootSpeedConst));
-        }
     }
 
     //commands

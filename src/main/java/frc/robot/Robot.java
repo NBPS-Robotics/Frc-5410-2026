@@ -134,6 +134,7 @@ public class Robot extends TimedRobot
   public void autonomousInit()
   {
     IntakeSubsystem.getInstance().setBrake();
+    IntakeSubsystem.getInstance().zero();
     m_robotContainer.cancelResetOdometryFromVision();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();

@@ -148,6 +148,7 @@ public class ShooterCommands {
 
         boolean doLoading;
         Translation2d goalPose;
+        
         public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
             transfer = TransferSubsystem.getInstance();
@@ -155,30 +156,17 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
 
-            botPose = drivebase.getPose();
+            
 
-            if (drivebase.isRedAlliance() && botPose.getX() > 11.85)
-                    goalPose = new Translation2d(11.920, 4.04);
-            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() >= 4.04)
-                    goalPose = new Translation2d(15, 7);
-            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() < 4.04)
-                    goalPose = new Translation2d(15, 1.5);
-            else if (drivebase.isRedAlliance() && botPose.getX() < 4.65)
-                    goalPose = new Translation2d(4.60, 4.04);
-            else if (drivebase.isRedAlliance() && botPose.getX() >= 4.65 && botPose.getY() >= 4.04)
-                    goalPose = new Translation2d(2, 7);
-            else
-                    goalPose = new Translation2d(2, 1.5);
-
-    addRequirements(floor, transfer, shooter, drivebase);
-    doLoading = false;
-}
+            addRequirements(floor, transfer, shooter, drivebase);
+            doLoading = false;
+        }
 
         @Override
         public void initialize() {
             shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            //floor.stopFloor();
-            //transfer.setStop();
+            floor.stopFloor();
+            transfer.setStop();
 
             doLoading = false;
         }
@@ -195,20 +183,39 @@ public class ShooterCommands {
                                 true
             );
             
-            double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-            if (distance < 2.4 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConst) {
+            botPose = drivebase.getPose();
+            if (drivebase.isRedAlliance() && botPose.getX() > 11.85)
+                    goalPose = new Translation2d(11.920, 4.04);
+            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() >= 4.04)
+                    goalPose = new Translation2d(15, 7);
+            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() < 4.04)
+                    goalPose = new Translation2d(15, 1.5);
+            else if (!drivebase.isRedAlliance() && botPose.getX() < 4.65)
+                    goalPose = new Translation2d(4.60, 4.04);
+            else if (!drivebase.isRedAlliance() && botPose.getX() >= 4.65 && botPose.getY() >= 4.04)
+                    goalPose = new Translation2d(2, 7);
+            else
+                    goalPose = new Translation2d(2, 1.5);
+
+            double distance = botPose.getTranslation().getDistance(goalPose);
+            if (goalPose.getX() == 15 || goalPose.getX() == 2) {
+                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.feedSpeed;
+                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            } else if (distance < 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
                 Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
                 shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            } else if (distance >= 2.4 && Constants.ShooterConstants.shootSpeed == Constants.ShooterConstants.shootSpeedConstLow) {
+            } else if (distance > 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
                 Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
                 shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             }
-            shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed==Constants.ShooterConstants.shootSpeedConst));
-            
+            shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
+
             if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
                 doLoading = true;
             }
@@ -223,6 +230,91 @@ public class ShooterCommands {
             floor.stopFloor();
             transfer.setStop();
             shooter.setIdle();
+            shooter.setHood(0.49);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+    }
+
+
+
+
+
+
+    public static class TurnAndShootInAutoCommand extends Command {
+
+        FloorSubsystem floor;
+        TransferSubsystem transfer;
+        ShooterSubsystem shooter;
+        SwerveSubsystem drivebase=SwerveSubsystem.getInstance();
+        CommandPS5Controller gamepad;
+        Pose2d botPose=drivebase.getPose();
+
+        boolean doLoading;
+        Translation2d goalPose;
+        
+        public TurnAndShootInAutoCommand(SwerveSubsystem p_drivebase) {
+            floor = FloorSubsystem.getInstance();
+            transfer = TransferSubsystem.getInstance();
+            shooter = ShooterSubsystem.getInstance();
+            drivebase = p_drivebase;
+            
+            addRequirements(floor, transfer, shooter, drivebase);
+            doLoading = false;
+        }
+
+        @Override
+        public void initialize() {
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            floor.stopFloor();
+            transfer.setStop();
+
+            doLoading = false;
+        }
+
+        @Override
+        public void execute() {
+            double[] transV = SwerveSubsystem.deadband2d(0, 0, Constants.OIConstants.kDriveDeadband);
+            double angRot = getTurnSpeed(drivebase, null, goalPose);
+            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
+                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
+                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
+                                true,
+                                true
+            );
+            
+            botPose = drivebase.getPose();
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(2, 1.5);
+
+            double distance = botPose.getTranslation().getDistance(goalPose);
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
+
+            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                doLoading = true;
+            }
+            if (doLoading) {
+                floor.doFloorIntake();
+                transfer.setRun();
+            }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            floor.stopFloor();
+            transfer.setStop();
+            shooter.setIdle();
+            shooter.setHood(0.49);
         }
 
         @Override
