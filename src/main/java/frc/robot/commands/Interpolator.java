@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Interpolator {
 
-    public enum DataType { HOOD, SHOT_TIME }
+    public enum DataType { HOOD, HOOD_CLOSE, SHOT_TIME }
 
     private static boolean failed = false;
     public static void failed() {
@@ -17,11 +17,13 @@ public class Interpolator {
     }
 
     private static final TreeMap<Double, Double> hoodValues = new TreeMap<>();
+    private static final TreeMap<Double, Double> hoodCloseValues = new TreeMap<>();
     private static final TreeMap<Double, Double> shotTimeValues = new TreeMap<>();
 
     // Load both files using File objects
-    public static void loadFiles(File hoodFile, File shotTimeFile) throws IOException {
+    public static void loadFiles(File hoodFile, File hoodCloseFile, File shotTimeFile) throws IOException {
         loadIntoMap(hoodFile, hoodValues);
+        loadIntoMap(hoodCloseFile, hoodCloseValues);
         loadIntoMap(shotTimeFile, shotTimeValues);
     }
 
@@ -34,7 +36,7 @@ public class Interpolator {
     }
 
     public static double interpolate(double x, DataType type) {
-        TreeMap<Double, Double> values = (type == DataType.HOOD) ? hoodValues : shotTimeValues;
+        TreeMap<Double, Double> values = (type == DataType.HOOD) ? hoodValues : ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
 
         if (values.containsKey(x)) return values.get(x);
 

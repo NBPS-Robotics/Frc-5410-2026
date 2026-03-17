@@ -44,7 +44,9 @@ public class ShooterCommands {
     }
 
     public static double hoodAngle(double distance, boolean normalSpeed) {
-        return normalSpeed ? 0.02607*distance + 0.46286 : 0.02607*distance + 0.46286;
+        return normalSpeed
+            ? Interpolator.interpolate(distance, Interpolator.DataType.HOOD)
+            : Interpolator.interpolate(distance, Interpolator.DataType.HOOD_CLOSE);
     }
 
 
