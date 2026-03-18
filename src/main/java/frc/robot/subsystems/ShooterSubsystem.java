@@ -133,6 +133,14 @@ public class ShooterSubsystem extends SubsystemBase{
         shooterPidL.setI(0.00);
         shooterPidR.setI(0.00);
     }
+    public void setIdleHigh(){
+        shooterPidR.setSetpoint(ShooterConstants.idleSpeed*2.5);
+        shooterPidL.setSetpoint(ShooterConstants.idleSpeed*2.5);
+        shooterPidR.setP(0.00004);
+        shooterPidL.setP(0.00004);
+        shooterPidL.setI(0.00);
+        shooterPidR.setI(0.00);
+    }
 
     public void setFeed(){
         shooterPidR.setSetpoint(-ShooterConstants.feedSpeed);
@@ -204,6 +212,9 @@ public class ShooterSubsystem extends SubsystemBase{
     }
     public Command idleCommand(){
         return this.runOnce(()->setIdle());
+    }
+    public Command idleHighCommand() {
+        return this.runOnce(()->setIdleHigh());
     }
     public Command feedCommand(){
         return this.runOnce(()->setFeed());

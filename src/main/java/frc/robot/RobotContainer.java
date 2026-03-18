@@ -255,6 +255,7 @@ public class RobotContainer
   }
 
   public void registerNamedCommands() {//TODO:autos here
+    NamedCommands.registerCommand("Idle Shooter", shooter.idleHighCommand());
     NamedCommands.registerCommand("Deploy Intake", intake.deployCommand());
     NamedCommands.registerCommand("Start Intake", intake.intakeCommand());
     NamedCommands.registerCommand("Stow Intake", intake.stowCommand());
