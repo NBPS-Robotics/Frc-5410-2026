@@ -105,7 +105,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsCOMPETITION(); // testing code
+    configureBindingsShooterTuning(); // testing code
 
     // Load interpolator files (if present)
     try {
@@ -163,7 +163,7 @@ public class RobotContainer
 
   
   
-  private void configureBindingsPanelTest()
+  private void configureBindingsShooterTuning()
   {
 
     // DRIVER CONTROLS:
@@ -176,19 +176,17 @@ public class RobotContainer
 
     //Options - Zeros the robot heading
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
-    driverGamepad.L1().onTrue(shooter.hoodCommand(0.6));
-    driverGamepad.R1().onTrue(shooter.hoodCommand(0.77));
-    driverGamepad.R2().onTrue(shooter.shootCommand()).onFalse(shooter.idleCommand());
+    driverGamepad.R2().whileTrue(new ShooterCommands.JustDoShootCommand(drivebase));
 
-    driverGamepad.povDown().onTrue(new InstantCommand(shooter::setDecreasePL));
-    driverGamepad.povUp().onTrue(new InstantCommand(shooter::setIncreasePL));
-    driverGamepad.povLeft().onTrue(new InstantCommand(shooter::setDecreaseFL));
-    driverGamepad.povRight().onTrue(new InstantCommand(shooter::setIncreaseFL));
+    driverGamepad.povUp().onTrue(shooter.runOnce(()->shooter.setIncreasePR()));
+    driverGamepad.povDown().onTrue(shooter.runOnce(()->shooter.setDecreasePR()));
+    driverGamepad.povRight().onTrue(shooter.runOnce(()->shooter.setIncreaseDR()));
+    driverGamepad.povLeft().onTrue(shooter.runOnce(()->shooter.setDecreaseDR()));
 
-    driverGamepad.cross().onTrue(new InstantCommand(shooter::setDecreasePR));
-    driverGamepad.triangle().onTrue(new InstantCommand(shooter::setIncreasePR));
-    driverGamepad.square().onTrue(new InstantCommand(shooter::setDecreaseFR));
-    driverGamepad.circle().onTrue(new InstantCommand(shooter::setIncreaseFR));
+    driverGamepad.triangle().onTrue(shooter.runOnce(()->shooter.setIncreaseFRHigh()));
+    driverGamepad.cross().onTrue(shooter.runOnce(()->shooter.setDecreaseFRHigh()));
+    driverGamepad.circle().onTrue(shooter.runOnce(()->shooter.setIncreaseFRLow()));
+    driverGamepad.square().onTrue(shooter.runOnce(()->shooter.setDecreaseFRLow()));
 
     //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
     //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
@@ -289,13 +287,13 @@ public class RobotContainer
     SmartDashboard.putNumber("Field Y Position", fieldPos.getY());
     SmartDashboard.putNumber("Field Heading", fieldPos.getRotation().getDegrees());
 
-    int i=1;
+    /*int i=1;
     for (SwerveModule module : drivebase.swerveDrive.swerveDriveConfiguration.modules) {
       SmartDashboard.putNumber("module absolute "+i, module.getAbsoluteEncoder().getAbsolutePosition());
       SmartDashboard.putNumber("module angle "+i, module.getState().angle.getDegrees());
       SmartDashboard.putNumber("module offset "+i,Math.abs(module.getAbsoluteEncoder().getAbsolutePosition()-module.getState().angle.getDegrees()));
       i++;
-    }
+    }*/
 
     SmartDashboard.putBoolean("Interpolator Failed Load?", Interpolator.hasFailed());
     SmartDashboard.putNumber("Distance to Goal", drivebase.getPose().getTranslation().getDistance(new Translation2d(4.6,4)));

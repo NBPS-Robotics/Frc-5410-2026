@@ -156,7 +156,10 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
 
-            
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(4.6, 4.04);
 
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
@@ -175,18 +178,6 @@ public class ShooterCommands {
         public void execute() {
 
             botPose = drivebase.getPose();
-            if (drivebase.isRedAlliance() && botPose.getX() > 11.85)
-                    goalPose = new Translation2d(11.920, 4.04);
-            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() >= 4.04)
-                    goalPose = new Translation2d(15, 7);
-            else if (drivebase.isRedAlliance() && botPose.getX() <= 11.85 && botPose.getY() < 4.04)
-                    goalPose = new Translation2d(15, 1.5);
-            else if (!drivebase.isRedAlliance() && botPose.getX() < 4.65)
-                    goalPose = new Translation2d(4.60, 4.04);
-            else if (!drivebase.isRedAlliance() && botPose.getX() >= 4.65 && botPose.getY() >= 4.04)
-                    goalPose = new Translation2d(2, 7);
-            else
-                    goalPose = new Translation2d(2, 1.5);
 
             double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
             double angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, goalPose) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
@@ -199,12 +190,7 @@ public class ShooterCommands {
             );
 
             double distance = botPose.getTranslation().getDistance(goalPose);
-            if (goalPose.getX() == 15 || goalPose.getX() == 2) {
-                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.feedSpeed;
-                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
-                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
-                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            } else if (distance < 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
+            if (distance < 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
                 Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
@@ -263,6 +249,11 @@ public class ShooterCommands {
             shooter = ShooterSubsystem.getInstance();
             drivebase = p_drivebase;
             
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(4.6, 4);
+
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
         }
@@ -279,10 +270,6 @@ public class ShooterCommands {
         @Override
         public void execute() {
             botPose = drivebase.getPose();
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(11.920, 4.04);
-            else
-                    goalPose = new Translation2d(4.6, 4);
 
             double[] transV = SwerveSubsystem.deadband2d(0, 0, Constants.OIConstants.kDriveDeadband);
             double angRot = getTurnSpeed(drivebase, null, goalPose);
@@ -325,4 +312,88 @@ public class ShooterCommands {
             return false;
         }
     }
+
+
+
+
+
+    public static class JustDoShootCommand extends Command {
+
+        FloorSubsystem floor;
+        TransferSubsystem transfer;
+        ShooterSubsystem shooter;
+        SwerveSubsystem drivebase=SwerveSubsystem.getInstance();
+        Pose2d botPose=drivebase.getPose();
+
+        boolean doLoading;
+        Translation2d goalPose;
+        
+        public JustDoShootCommand(SwerveSubsystem p_drivebase) {
+            floor = FloorSubsystem.getInstance();
+            transfer = TransferSubsystem.getInstance();
+            shooter = ShooterSubsystem.getInstance();
+            drivebase = p_drivebase;
+
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(4.6, 4.04);
+
+            addRequirements(floor, transfer, shooter);
+            doLoading = false;
+        }
+
+        @Override
+        public void initialize() {
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            floor.stopFloor();
+            transfer.setStop();
+
+            doLoading = false;
+        }
+
+        @Override
+        public void execute() {
+
+            botPose = drivebase.getPose();
+
+            double angRot = getTurnSpeed(drivebase, null, goalPose);
+
+            double distance = botPose.getTranslation().getDistance(goalPose);
+            if (autoTurnEnabled && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
+                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
+                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            } else if (Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
+                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
+                Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
+                Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
+                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            }
+            shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
+
+            if (shooter.atSpeed()) {
+                doLoading = true;
+            }
+            if (doLoading) {
+                floor.doFloorIntake();
+                transfer.setRun();
+            }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            floor.stopFloor();
+            transfer.setStop();
+            shooter.setIdle();
+            shooter.setHood(0.49);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+    }
+
 }

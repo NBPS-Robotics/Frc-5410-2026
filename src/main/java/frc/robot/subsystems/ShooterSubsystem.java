@@ -32,6 +32,7 @@ public class ShooterSubsystem extends SubsystemBase{
 
     public final PIDController shooterPidR=new PIDController(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr);
     public final PIDController shooterPidL=new PIDController(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl);
+    public final PIDController PIDToTune = shooterPidR;
 
     private final SparkBaseConfig rightConfig;
     private final SparkBaseConfig right2Config;
@@ -66,34 +67,40 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
     public void setIncreasePR(){
-        ShooterConstants.pr+=0.000001;
+        ShooterConstants.pr+=0.00001;
 		shooterPidR.setP(ShooterConstants.pr);
-    }
-    public void setIncreasePL(){
-        ShooterConstants.pl+=0.000001;
-		shooterPidL.setP(ShooterConstants.pl);
     }
     public void setDecreasePR(){
-        ShooterConstants.pr-=0.000001;
+        ShooterConstants.pr-=0.00001;
 		shooterPidR.setP(ShooterConstants.pr);
     }
-    public void setDecreasePL(){
-        ShooterConstants.pl-=0.000001;
-		shooterPidL.setP(ShooterConstants.pl);
+    public void setIncreaseDR(){
+        ShooterConstants.dr+=0.000001;
+        shooterPidR.setD(ShooterConstants.dr);
+    }
+    public void setDecreaseDR(){
+        ShooterConstants.dr-=0.000001;
+        shooterPidR.setD(ShooterConstants.dr);
     }
 
-    public void setIncreaseFR(){
-        ShooterConstants.fr+=0.000001;
+
+    public void setIncreaseFRHigh(){
+        ShooterConstants.frHigh+=0.000001;
+        if (ShooterConstants.shootSpeed==ShooterConstants.shootSpeedConst) ShooterConstants.fr=ShooterConstants.frHigh;
     }
-    public void setIncreaseFL(){
-        ShooterConstants.fl+=0.000001;
+    public void setDecreaseFRHigh(){
+        ShooterConstants.frHigh-=0.000001;
+        if (ShooterConstants.shootSpeed==ShooterConstants.shootSpeedConst) ShooterConstants.fr=ShooterConstants.frHigh;
     }
-    public void setDecreaseFR(){
-        ShooterConstants.fr-=0.000001;
+    public void setIncreaseFRLow(){
+        ShooterConstants.frLow+=0.000001;
+        if (ShooterConstants.shootSpeed==ShooterConstants.shootSpeedConstLow) ShooterConstants.fr=ShooterConstants.frLow;
     }
-    public void setDecreaseFL(){
-        ShooterConstants.fl-=0.000001;
+    public void setDecreaseFRLow(){
+        ShooterConstants.frLow-=0.000001;
+        if (ShooterConstants.shootSpeed==ShooterConstants.shootSpeedConstLow) ShooterConstants.fr=ShooterConstants.frLow;
     }
+
 
     public boolean atSpeed(){
         return (Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<120)&&(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120);
@@ -168,9 +175,11 @@ public class ShooterSubsystem extends SubsystemBase{
 
     public void telemetry(){
       SmartDashboard.putNumber("pr",shooterPidR.getP());
+      SmartDashboard.putNumber("dr",shooterPidR.getD());
       SmartDashboard.putNumber("fr",ShooterConstants.fr);
-      SmartDashboard.putNumber("pl",shooterPidL.getP());
-      SmartDashboard.putNumber("fl",ShooterConstants.fl);
+      SmartDashboard.putNumber("frHigh", ShooterConstants.frHigh);
+      SmartDashboard.putNumber("frLow", ShooterConstants.frLow);
+      SmartDashboard.putNumber("shootSpeed", ShooterConstants.shootSpeed);
       SmartDashboard.putNumber("r speed",rTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
