@@ -175,7 +175,8 @@ public class RobotContainer
     //shooter.setDefaultCommand(shooter.runPidCommand());
 
     //Options - Zeros the robot heading
-    driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    //driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
+    driverGamepad.options().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
     driverGamepad.R2().whileTrue(new ShooterCommands.JustDoShootCommand(drivebase));
 
     driverGamepad.povUp().onTrue(shooter.runOnce(()->shooter.setIncreasePR()));

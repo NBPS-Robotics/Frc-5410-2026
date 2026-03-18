@@ -326,6 +326,7 @@ public class ShooterCommands {
         Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
+        boolean doneLoading;
         Translation2d goalPose;
         
         public JustDoShootCommand(SwerveSubsystem p_drivebase) {
@@ -341,6 +342,7 @@ public class ShooterCommands {
 
             addRequirements(floor, transfer, shooter);
             doLoading = false;
+            doneLoading = false;
         }
 
         @Override
@@ -350,6 +352,7 @@ public class ShooterCommands {
             transfer.setStop();
 
             doLoading = false;
+            doneLoading = false;
         }
 
         @Override
@@ -357,7 +360,7 @@ public class ShooterCommands {
 
             botPose = drivebase.getPose();
 
-            double angRot = getTurnSpeed(drivebase, null, goalPose);
+            //double angRot = getTurnSpeed(drivebase, null, goalPose);
 
             double distance = botPose.getTranslation().getDistance(goalPose);
             if (autoTurnEnabled && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
@@ -365,7 +368,7 @@ public class ShooterCommands {
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
                 shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
-            } else if (Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
+            } else if (!autoTurnEnabled && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
                 Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
                 Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
                 Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
@@ -373,12 +376,13 @@ public class ShooterCommands {
             }
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
-            if (shooter.atSpeed()) {
+            if (!doLoading && shooter.atSpeed()) {
                 doLoading = true;
             }
-            if (doLoading) {
+            if (!doneLoading && doLoading) {
                 floor.doFloorIntake();
                 transfer.setRun();
+                doneLoading = true;
             }
         }
 
