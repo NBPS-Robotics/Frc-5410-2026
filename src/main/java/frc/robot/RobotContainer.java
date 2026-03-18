@@ -105,7 +105,7 @@ public class RobotContainer
 
     // Input bindings
     //configureBindingsPanel(); // testing code
-    configureBindingsShooterTuning(); // testing code
+    configureBindingsCOMPETITION(); // testing code
 
     // Load interpolator files (if present)
     try {
@@ -146,9 +146,8 @@ public class RobotContainer
     // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
     // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
     driverGamepad.R2().whileTrue(new ParallelCommandGroup(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad),new InstantCommand(()->shooter.shootMode=true)));
-    driverGamepad.R1().and(()->!shooter.shootMode).onTrue(new InstantCommand(()->shooter.shootMode=true));
-    driverGamepad.R1().and(()->shooter.shootMode).onTrue(new SequentialCommandGroup(new InstantCommand(()->shooter.shootMode=false),shooter.hoodCommand(0.49)));//TODO:toggle shoot mode, when not in shoot mode should be fully stowed to protect hood
-//    driverGamepad.R1().onTrue(ShooterCommands.aimHoodCommand());
+    driverGamepad.R1().whileTrue(new ParallelCommandGroup(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad),new InstantCommand(()->shooter.shootMode=true)));
+
 
     // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
     // driverGamepad.povUp().and(()->!shooter.shootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
