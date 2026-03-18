@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Start Intake"
+          }
+        },
+        {
           "type": "wait",
           "data": {
             "waitTime": 0.2

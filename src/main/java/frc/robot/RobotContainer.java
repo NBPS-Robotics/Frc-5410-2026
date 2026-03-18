@@ -111,6 +111,7 @@ public class RobotContainer
     try {
       Interpolator.loadFiles(
         new File(Filesystem.getDeployDirectory(), "HoodData.txt"),
+        new File(Filesystem.getDeployDirectory(), "HoodDataClose.txt"),
         new File(Filesystem.getDeployDirectory(), "ShootTimeData.txt")
       );
     } catch (IOException e) {
@@ -256,6 +257,7 @@ public class RobotContainer
 
   public void registerNamedCommands() {//TODO:autos here
     NamedCommands.registerCommand("Deploy Intake", intake.deployCommand());
+    NamedCommands.registerCommand("Start Intake", intake.intakeCommand());
     NamedCommands.registerCommand("Stow Intake", intake.stowCommand());
     NamedCommands.registerCommand("Turn And Shoot", new ShooterCommands.TurnAndShootInAutoCommand(drivebase));
   }
@@ -281,7 +283,6 @@ public class RobotContainer
   public void updateSmartDashboard() {
     
 
-    SmartDashboard.putNumber("Pigeon Oritentation", drivebase.pigeon.getAccumGyroZ().getValueAsDouble() % 360.0);
 
     Pose2d fieldPos = drivebase.getPose();
     SmartDashboard.putNumber("Field X Position", fieldPos.getX());

@@ -62,7 +62,7 @@ public class ShooterSubsystem extends SubsystemBase{
             lBottom.configure(left2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
 
-        setHood(0.6);
+        setHood(0.49);
     }
 
     public void setIncreasePR(){
@@ -153,7 +153,7 @@ public class ShooterSubsystem extends SubsystemBase{
         return new InstantCommand(()->runPid(),this);
     }
     public void setHood(double val){
-        if(val>=0.7){
+        if(val<=0.7){
         hoodServoR.set(val);
         hoodServoL.set(val+0.02);
         }else{

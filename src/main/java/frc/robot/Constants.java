@@ -98,21 +98,21 @@ public final class Constants {
     public static final int L2CanId=9;
     public static final int R2CanId=7;
     
-    public static double pr=0.0008;//
+    public static double pr=0.0004;//
     public static final double ir=0.000001;
     public static final double dr=0.00000;//
-    public static final double frHigh = 0.000176;
-    public static final double frLow = 0.000195;
+    public static final double frLow = 0.000176;
+    public static final double frHigh = 0.000195;
     public static double fr = frLow;
 
-    public static double pl=0.0008;//
+    public static double pl=0.0004;//
     public static final double il=0.000001;
     public static final double dl=0.00000;//
-    public static final double flHigh = 0.000176;
-    public static final double flLow = 0.000185;
+    public static final double flLow = 0.000176;
+    public static final double flHigh = 0.000185;
     public static double fl = flLow;
 
-    public static final int feedSpeed = 2000;
+    public static final int feedSpeed = 1600;
     public static final int shootSpeedConst = 1380;
     public static final int shootSpeedConstLow = 1150;
     public static int shootSpeed = shootSpeedConst;
@@ -125,7 +125,7 @@ public final class Constants {
   public static final class FloorConstants {
     public static final int canID = 11;
 
-    public static final double motorSpeed = 0.75;
+    public static final double motorSpeed = 1.00;
   }
 
   public static final class IntakeConstants {

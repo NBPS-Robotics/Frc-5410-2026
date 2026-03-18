@@ -44,9 +44,7 @@ public class ShooterCommands {
     }
 
     public static double hoodAngle(double distance, boolean normalSpeed) {
-        return normalSpeed
-            ? Interpolator.interpolate(distance, Interpolator.DataType.HOOD)
-            : Interpolator.interpolate(distance, Interpolator.DataType.HOOD_CLOSE);
+        return normalSpeed ? 0.02607*distance + 0.46286 : 0.02607*distance + 0.46286;
     }
 
 
@@ -175,16 +173,7 @@ public class ShooterCommands {
 
         @Override
         public void execute() {
-            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
-            double angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, goalPose) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
-            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
-                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
-                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
-                                true,
-                                true
-            );
-            
+
             botPose = drivebase.getPose();
             if (drivebase.isRedAlliance() && botPose.getX() > 11.85)
                     goalPose = new Translation2d(11.920, 4.04);
@@ -198,6 +187,16 @@ public class ShooterCommands {
                     goalPose = new Translation2d(2, 7);
             else
                     goalPose = new Translation2d(2, 1.5);
+
+            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
+            double angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, goalPose) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
+                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
+                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
+                                true,
+                                true
+            );
 
             double distance = botPose.getTranslation().getDistance(goalPose);
             if (goalPose.getX() == 15 || goalPose.getX() == 2) {
@@ -279,6 +278,12 @@ public class ShooterCommands {
 
         @Override
         public void execute() {
+            botPose = drivebase.getPose();
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(4.6, 4);
+
             double[] transV = SwerveSubsystem.deadband2d(0, 0, Constants.OIConstants.kDriveDeadband);
             double angRot = getTurnSpeed(drivebase, null, goalPose);
             drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
@@ -289,11 +294,7 @@ public class ShooterCommands {
                                 true
             );
             
-            botPose = drivebase.getPose();
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(11.920, 4.04);
-            else
-                    goalPose = new Translation2d(2, 1.5);
+            
 
             double distance = botPose.getTranslation().getDistance(goalPose);
             Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
