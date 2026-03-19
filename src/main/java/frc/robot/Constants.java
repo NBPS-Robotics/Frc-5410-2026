@@ -23,7 +23,7 @@ public final class Constants {
   
 
   public static final class DriveConstants {
-    public static final double MaxErrorFromBot = 0.5;
+    public static final double MaxErrorFromBot = 100;
     //controls speed for telop
     public static final double speedFull = 1.0;
     public static final double speedSlow = 0.5;
