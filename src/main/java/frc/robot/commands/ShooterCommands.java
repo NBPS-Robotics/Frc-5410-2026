@@ -84,6 +84,17 @@ public class ShooterCommands {
         return angleError * 1.0;
     }
 
+    public static double getTurnSpeed(SwerveSubsystem drivebase, CommandPS5Controller gamepad, double angle) {
+        
+
+
+        double desiredAngle = angle;
+        double currentAngle = drivebase.getPose().getRotation().getRadians();
+        double angleError = MathUtil.clamp(desiredAngle - currentAngle, -Math.PI, Math.PI);
+
+        return angleError * 1.0;
+    }
+
     
 
     public static Command getTurnDriveShootWhileAtRestCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
@@ -202,6 +213,83 @@ public class ShooterCommands {
                 shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             }
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
+
+            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                doLoading = true;
+            }
+            if (doLoading) {
+                floor.doFloorIntake();
+                transfer.setRun();
+            }
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            floor.stopFloor();
+            transfer.setStop();
+            shooter.setIdle();
+            shooter.setHood(0.49);
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+    }
+
+    public static class FullFeedCommand extends Command {
+
+        FloorSubsystem floor;
+        TransferSubsystem transfer;
+        ShooterSubsystem shooter;
+        SwerveSubsystem drivebase=SwerveSubsystem.getInstance();
+        CommandPS5Controller gamepad;
+        Pose2d botPose=drivebase.getPose();
+
+        boolean doLoading;
+        
+        public FullFeedCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
+            floor = FloorSubsystem.getInstance();
+            transfer = TransferSubsystem.getInstance();
+            shooter = ShooterSubsystem.getInstance();
+            drivebase = p_drivebase;
+            gamepad = p_gamepad;
+
+            
+            addRequirements(floor, transfer, shooter, drivebase);
+            doLoading = false;
+        }
+
+        @Override
+        public void initialize() {
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+            floor.stopFloor();
+            transfer.setStop();
+
+            doLoading = false;
+
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            shooter.setSpeed(Constants.ShooterConstants.feedSpeed);
+            shooter.setHood(0.7);
+        }
+
+        @Override
+        public void execute() {
+
+            botPose = drivebase.getPose();
+
+            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
+            double angRot;
+            if(drivebase.isRedAlliance())angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, 0) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            else angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, Math.PI) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
+                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
+                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
+                                true,
+                                true
+            );
 
             if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
                 doLoading = true;
