@@ -35,7 +35,7 @@ public class VisionSubsystem extends SubsystemBase{
     public double resetOdomAt = -10;
 
     private static final String fLimeName = "limelight-limef";
-    private static final String bLimeName = "limelight-limeb";
+    private static final String bLimeName = "limelight-limeb1";
 
     private static final String fPoseName = "FLpose";
     private static final String bPoseName = "BLpose";
@@ -186,7 +186,7 @@ public class VisionSubsystem extends SubsystemBase{
                 limeF.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 
             if (!ignoreAllLimes && !ignoreFlLime) {
-                SmartDashboard.putBoolean(fPoseName, true);
+                //SmartDashboard.putBoolean(fPoseName, true);
                 flNT.set(limeF.pose);
 
                 swerve.swerveDrive.addVisionMeasurement(
@@ -195,7 +195,7 @@ public class VisionSubsystem extends SubsystemBase{
                     VecBuilder.fill(0.5, 0.5, 5).div(LimelightHelpers.getTA(fLimeName))
                 );
             } else {
-                SmartDashboard.putBoolean(fPoseName, false);
+                //SmartDashboard.putBoolean(fPoseName, false);
             }
 
             limeFPrev = limeF;
@@ -236,7 +236,7 @@ public class VisionSubsystem extends SubsystemBase{
                 limeB.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 
             if (!ignoreAllLimes && !ignoreBlLime) {
-                SmartDashboard.putBoolean(bPoseName, true);
+                //SmartDashboard.putBoolean(bPoseName, true);
                 blNT.set(limeB.pose);
 
                 swerve.swerveDrive.addVisionMeasurement(
@@ -245,7 +245,7 @@ public class VisionSubsystem extends SubsystemBase{
                     VecBuilder.fill(0.75, 0.75, 5).div(LimelightHelpers.getTA(bLimeName))
                 );
             } else {
-                SmartDashboard.putBoolean(bPoseName, false);
+                //SmartDashboard.putBoolean(bPoseName, false);
             }
 
             limeBPrev = limeB;
@@ -278,9 +278,9 @@ public class VisionSubsystem extends SubsystemBase{
         limeB = LimelightHelpers.getBotPoseEstimate_wpiBlue(bLimeName);
         limeF = LimelightHelpers.getBotPoseEstimate_wpiBlue(fLimeName);
             if (!ignoreAllLimes) {
-                SmartDashboard.putBoolean(bPoseName, true);
+                //SmartDashboard.putBoolean(bPoseName, true);
                 limeB = validatePoseEstimate(limeB);
-                SmartDashboard.putBoolean(fPoseName, true);
+                //SmartDashboard.putBoolean(fPoseName, true);
                 limeF = validatePoseEstimate(limeF);//makes sure pose is valid
 
                 PoseEstimate bestPose;

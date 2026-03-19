@@ -182,11 +182,13 @@ public class ShooterSubsystem extends SubsystemBase{
     public boolean shootMode=false;
 
     public void telemetry(){
+      /*
       SmartDashboard.putNumber("pr",shooterPidR.getP());
       SmartDashboard.putNumber("dr",shooterPidR.getD());
       SmartDashboard.putNumber("fr",ShooterConstants.fr);
       SmartDashboard.putNumber("frHigh", ShooterConstants.frHigh);
       SmartDashboard.putNumber("frLow", ShooterConstants.frLow);
+      */
       SmartDashboard.putNumber("shootSpeed", ShooterConstants.shootSpeed);
       SmartDashboard.putNumber("r speed",rTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());

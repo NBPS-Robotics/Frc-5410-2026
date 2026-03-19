@@ -147,6 +147,7 @@ public class RobotContainer
     // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
     driverGamepad.R2().whileTrue(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad));
     driverGamepad.R1().whileTrue(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad));
+    driverGamepad.triangle().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
 
 
     // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
@@ -247,10 +248,10 @@ public class RobotContainer
   public void setAutoCommands(){
     autoChooser.addOption("HumanPlayer", new PathPlannerAuto("BlueHumanPlayer"));
     autoChooser.addOption("HumanPlayerSimple", new PathPlannerAuto("BlueHumanPlayerSimple"));
-    autoChooser.addOption("HumanPlayerCloseShot", new PathPlannerAuto("CenterAutoSimple"));
+    autoChooser.addOption("HumanPlayerCloseShot", new PathPlannerAuto("BlueHumanPlayerCloseShoot"));
     autoChooser.addOption("Trough", new PathPlannerAuto("BlueTrough"));
     autoChooser.addOption("TroughSimple", new PathPlannerAuto("BlueTroughSimple"));
-    autoChooser.addOption("TroughCloseShot", new PathPlannerAuto("CenterAutoSimple"));
+    autoChooser.addOption("TroughCloseShot", new PathPlannerAuto("BlueTroughCloseShoot"));
     autoChooser.addOption("CenterAuto", new PathPlannerAuto("CenterAuto"));
     autoChooser.addOption("CenterAutoSimple", new PathPlannerAuto("CenterAutoSimple"));
   }

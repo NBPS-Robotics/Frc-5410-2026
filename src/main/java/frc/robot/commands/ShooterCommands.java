@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -159,6 +160,8 @@ public class ShooterCommands {
 
         boolean doLoading;
         Translation2d goalPose;
+
+        int updater = 0;
         
         public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -167,10 +170,7 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
 
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(11.920, 4.04);
-            else
-                    goalPose = new Translation2d(4.6, 4.04);
+            
 
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
@@ -183,12 +183,27 @@ public class ShooterCommands {
             transfer.setStop();
 
             doLoading = false;
+            updater = 0;
+
+            if (drivebase.isRedAlliance())
+                    goalPose = new Translation2d(11.920, 4.04);
+            else
+                    goalPose = new Translation2d(4.6, 4.04);
         }
 
         @Override
         public void execute() {
 
             botPose = drivebase.getPose();
+
+            updater++;
+            if (updater%7==5) {
+                SmartDashboard.putNumber("getTurnSpeed", getTurnSpeed(drivebase, gamepad, goalPose));
+                SmartDashboard.putBoolean("autoTurnEnabled", autoTurnEnabled);
+                SmartDashboard.putNumber("true_distToGoal", botPose.getTranslation().getDistance(goalPose));
+                SmartDashboard.putNumber("goal.x", goalPose.getX());
+                SmartDashboard.putNumber("goal.y", goalPose.getY());
+            }
 
             double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
             double angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, goalPose) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
