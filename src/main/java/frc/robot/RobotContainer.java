@@ -245,10 +245,12 @@ public class RobotContainer
   }
 
   public void setAutoCommands(){
-    autoChooser.addOption("BlueHumanPlayer", new PathPlannerAuto("BlueHumanPlayer"));
-    autoChooser.addOption("BlueHumanPlayerSimple", new PathPlannerAuto("BlueHumanPlayerSimple"));
-    autoChooser.addOption("BlueTrough", new PathPlannerAuto("BlueTrough"));
-    autoChooser.addOption("BlueTroughSimple", new PathPlannerAuto("BlueTroughSimple"));
+    autoChooser.addOption("HumanPlayer", new PathPlannerAuto("BlueHumanPlayer"));
+    autoChooser.addOption("HumanPlayerSimple", new PathPlannerAuto("BlueHumanPlayerSimple"));
+    autoChooser.addOption("HumanPlayerCloseShot", new PathPlannerAuto("CenterAutoSimple"));
+    autoChooser.addOption("Trough", new PathPlannerAuto("BlueTrough"));
+    autoChooser.addOption("TroughSimple", new PathPlannerAuto("BlueTroughSimple"));
+    autoChooser.addOption("TroughCloseShot", new PathPlannerAuto("CenterAutoSimple"));
     autoChooser.addOption("CenterAuto", new PathPlannerAuto("CenterAuto"));
     autoChooser.addOption("CenterAutoSimple", new PathPlannerAuto("CenterAutoSimple"));
   }
