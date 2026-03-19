@@ -247,7 +247,6 @@ public class ShooterCommands {
         Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
-        Translation2d goalPose;
         
         public FullFeedCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -256,11 +255,7 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
 
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(15, 4.04);
-            else
-                    goalPose = new Translation2d(1.5, 4.04);
-
+            
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
         }

@@ -145,8 +145,8 @@ public class RobotContainer
     // driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
     // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
     // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
-    driverGamepad.R2().whileTrue(new ParallelCommandGroup(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad),new InstantCommand(()->shooter.shootMode=true)));
-    driverGamepad.R1().whileTrue(new ParallelCommandGroup(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad),new InstantCommand(()->shooter.shootMode=true)));
+    driverGamepad.R2().whileTrue(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad));
+    driverGamepad.R1().whileTrue(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad));
 
 
     // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
