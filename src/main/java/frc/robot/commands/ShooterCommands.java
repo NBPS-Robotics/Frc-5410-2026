@@ -80,7 +80,7 @@ public class ShooterCommands {
 
         double desiredAngle = Math.atan2(dy, dx);
         double currentAngle = drivebase.getPose().getRotation().getRadians();
-        double angleError = MathUtil.clamp(desiredAngle - currentAngle, -Math.PI, Math.PI);
+        double angleError = MathUtil.angleModulus(desiredAngle - currentAngle);
 
         return angleError * 1.0;
     }
@@ -91,7 +91,7 @@ public class ShooterCommands {
 
         double desiredAngle = angle;
         double currentAngle = drivebase.getPose().getRotation().getRadians();
-        double angleError = MathUtil.clamp(desiredAngle - currentAngle, -Math.PI, Math.PI);
+        double angleError = MathUtil.angleModulus(desiredAngle - currentAngle);
 
         return angleError * 1.0;
     }
@@ -159,7 +159,7 @@ public class ShooterCommands {
         Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
-        Translation2d goalPose;
+        Translation2d goalPose = new Translation2d(11.920, 4.04);
 
         int updater = 0;
         
@@ -387,9 +387,9 @@ public class ShooterCommands {
             
 
             double distance = botPose.getTranslation().getDistance(goalPose);
-            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
-            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
-            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
             shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 

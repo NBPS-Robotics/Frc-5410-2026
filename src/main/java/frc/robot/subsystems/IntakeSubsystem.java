@@ -8,16 +8,21 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.UtilCommands.WaitCommand;
+import swervelib.math.SwerveMath;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -26,10 +31,11 @@ public class IntakeSubsystem extends SubsystemBase{
     private SparkMax motor = new SparkMax(Constants.IntakeConstants.canID, MotorType.kBrushless);
     private SparkMax motor2 = new SparkMax(Constants.IntakeConstants.canID2, MotorType.kBrushless);
     public SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
-    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(25, 25);
+    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
+    SparkBaseConfig pivConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
     SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
     SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
-    SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(sharedConfig).inverted(true);
+    SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(pivConfig).inverted(true);
     private boolean stow=false;
     private static IntakeSubsystem intakeSingleton;
     public static IntakeSubsystem getInstance() {
@@ -105,10 +111,9 @@ public class IntakeSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         //SmartDashboard.putNumber("Intake Pos", pivot.getEncoder().getPosition());
-       // SmartDashboard.putBoolean("at stow", atStow().getAsBoolean());
-       // SmartDashboard.putBoolean("at stow", getAtPosistion());
         //SmartDashboard.putNumber("setpoint", pivot.getClosedLoopController().getSetpoint());
        // SmartDashboard.putNumber("dist to position", Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition()));
+       SmartDashboard.putNumber("Intake speed", motor.getEncoder().getVelocity());
     }
 
 
@@ -144,7 +149,7 @@ public class IntakeSubsystem extends SubsystemBase{
                 deployCommand(),
                 new ParallelRaceGroup(
                     new WaitUntilCommand(atDeploy()),
-                    new WaitCommand(1)),
+                    new WaitCommand(0.25)),
                 intakeCommand()
             );
         } else {
@@ -152,6 +157,72 @@ public class IntakeSubsystem extends SubsystemBase{
                 deployCommand(),
                 intakeCommand()
             );
+        }
+    }
+
+    private boolean slowEnabled = true;
+    public void toggleSlowEnabled() {
+        slowEnabled = !slowEnabled;
+    }
+
+    public class IntakeAndSlowCommand extends Command {
+
+        SwerveSubsystem drivebase;
+        CommandPS5Controller gamepad;
+        double startTime;
+
+        boolean startedRunning;
+
+        double speed = 0.6;
+        double timeToSlow = 1.0;
+
+        public IntakeAndSlowCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
+            drivebase = p_drivebase;
+            gamepad = p_gamepad;
+
+            addRequirements(getInstance(), drivebase);
+        }
+
+        @Override
+        public void initialize() {
+            deploy();
+            startTime = Timer.getFPGATimestamp();
+            startedRunning = false;
+        }
+
+        @Override
+        public void execute() {
+            double time = Timer.getFPGATimestamp() - startTime;
+            if (!startedRunning && (!atStow().getAsBoolean() || time > 0.25)) {
+                doIntake();
+                startedRunning = true;
+            }
+
+            double mult = (slowEnabled && time > timeToSlow)
+                        ? speed
+                        : 1.0 - (timeToSlow-time)*(1-speed);
+            
+            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY()*mult, -gamepad.getLeftX()*mult, Constants.OIConstants.kDriveDeadband);
+            double angRot = MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
+                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
+                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
+                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
+                                true,
+                                true
+            );
+
+
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            stopIntake();
         }
     }
 }
