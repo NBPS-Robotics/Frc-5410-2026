@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import java.io.File;
@@ -40,16 +36,15 @@ import frc.robot.subsystems.VisionSubsystem;
  */
 public class RobotContainer
 {
-  SendableChooser<Command> AutoChooser = new SendableChooser<>();
-  // The robot's subsystems and commands are defined here...
+  SendableChooser<Command> autoChooser = new SendableChooser<>();
+
   public final SwerveSubsystem drivebase = SwerveSubsystem.getInstance();
   public final VisionSubsystem vision = new VisionSubsystem(drivebase);
-  public final TransferSubsystem transfer=TransferSubsystem.getInstance();
-  public final ShooterSubsystem shooter=ShooterSubsystem.getInstance();
-  public final TestCommand test=new TestCommand(drivebase);
+  public final TransferSubsystem transfer = TransferSubsystem.getInstance();
+  public final ShooterSubsystem shooter = ShooterSubsystem.getInstance();
+  public final TestCommand test = new TestCommand(drivebase);
   public final FloorSubsystem floor = FloorSubsystem.getInstance();
   public final IntakeSubsystem intake = IntakeSubsystem.getInstance();
-
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandPS5Controller driverGamepad = new CommandPS5Controller(0);
@@ -71,13 +66,7 @@ public class RobotContainer
    * 16 12  8
    */
 
-  SendableChooser<Command> autoChooser = new SendableChooser<>();
-
-
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  public RobotContainer()
+   public RobotContainer()
   {
     // Register commands for PathPlanner
     registerNamedCommands();
@@ -104,7 +93,8 @@ public class RobotContainer
 
 
 
-  //comp bindings
+
+
   private void configureBindingsCOMPETITION()
   {
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad); //Joysticks - Drive the robot
@@ -120,25 +110,14 @@ public class RobotContainer
       intake.stowCommand(),
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
-    driverGamepad.povDown().onTrue(new SequentialCommandGroup(intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand())).onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
 
-    // driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
-    // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
-    // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
+    driverGamepad.povDown().onTrue(new SequentialCommandGroup(
+      intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand()))
+      .onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
+
     driverGamepad.R2().whileTrue(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad));
     driverGamepad.R1().whileTrue(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad));
     driverGamepad.triangle().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
-
-
-    // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
-    // driverGamepad.povUp().and(()->!shooter.shootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
-    //modes should function as such:
-    //shoot mode: always aim the hood so its ready when r2 is pressed
-    //feed mode: same but for feed aiming
-    //stow mode: keep hood down for protection
-    //on r2 press: if in shoot or feed aim robot yaw for shots and spin up shooter, when both ready shoot
-
-    //also add shoot on the move toggle to the button panel along with overrides we may find we need later
   }
 
   
@@ -146,15 +125,8 @@ public class RobotContainer
   public void configureBindingsShooterTuning()
   {
 
-    // DRIVER CONTROLS:
-
-    //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
-    //shooter.setDefaultCommand(shooter.runPidCommand());
-
-    //Options - Zeros the robot heading
-    //driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
     driverGamepad.options().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
     driverGamepad.R2().whileTrue(new ShooterCommands.JustDoShootCommand(drivebase));
 
@@ -168,10 +140,7 @@ public class RobotContainer
     driverGamepad.circle().onTrue(shooter.runOnce(()->shooter.setIncreaseFRLow()));
     driverGamepad.square().onTrue(shooter.runOnce(()->shooter.setDecreaseFRLow()));
 
-    //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
-    //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));
     driverGamepad.L2().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRun),floor.intakeCommand(),intake.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),intake.stopCommand()));
-    //driverGamepad.circle().onTrue(new InstantCommand(transfer::setRunFullB)).onFalse(new InstantCommand(transfer::setStop));
   }
 
 
@@ -199,13 +168,11 @@ public class RobotContainer
 
 
 
-
   public Trigger sticksInUseTrigger(CommandPS5Controller gamepad) {
     return new Trigger(() -> Math.abs(gamepad.getLeftX()) > Constants.OIConstants.kDriveDeadband
                           || Math.abs(gamepad.getLeftY()) > Constants.OIConstants.kDriveDeadband
                           || Math.abs(gamepad.getRightX()) > Constants.OIConstants.kDriveDeadband);
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -235,10 +202,7 @@ public class RobotContainer
     NamedCommands.registerCommand("Turn And Shoot", new ShooterCommands.TurnAndShootInAutoCommand(drivebase));
   }
 
-  public void setDriveMode()
-  {
-    //drivebase.setDefaultCommand();
-  }
+
 
   public void setMotorBrake(boolean brake)
   {
@@ -253,9 +217,8 @@ public class RobotContainer
   }
 
 
-  public void updateSmartDashboard() {
-    
 
+  public void updateSmartDashboard() {
 
     Pose2d fieldPos = drivebase.getPose();
     SmartDashboard.putNumber("Field X Position", fieldPos.getX());
@@ -272,14 +235,7 @@ public class RobotContainer
 
     SmartDashboard.putBoolean("Interpolator Failed Load?", Interpolator.hasFailed());
     SmartDashboard.putNumber("Distance to Goal", drivebase.getPose().getTranslation().getDistance(new Translation2d(4.6,4)));
-    
-    /* double goToStow = SmartDashboard.getNumber("Go to stow", 0);
-    if (goToStow > 0.001) dashboardStowCommand.schedule();
-    SmartDashboard.putNumber("Go to stow", 0);
-    SmartDashboard.putBoolean("Will go stow?", dashboardStowCommand.isScheduled()); */
 
     SmartDashboard.updateValues();
   }
-
-  //private Command dashboardStowCommand = opCommands.getStowParallelCommand();
 }
