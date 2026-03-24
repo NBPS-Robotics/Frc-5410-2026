@@ -2,20 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.FloorSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
@@ -24,10 +16,6 @@ import frc.robot.Constants;
 
 public class ShooterCommands {
 
-
-    //velocity should be in units per second
-    //getRelativeGoalPose will return the position of a hypothetical goal that the robot should aim for in order to hit the actual goal...
-    //...accounting for the time it will take for the ball to reach the goal and the movement of the robot during that time
     public static Translation2d getRelativeGoalPose(Pose2d robotPose, ChassisSpeeds velocity, Translation2d goalPose){
         Translation2d vel = new Translation2d(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond);
         Translation2d G = goalPose;
@@ -38,8 +26,6 @@ public class ShooterCommands {
         return G;
     }
 
-    //should return seconds to reach goal
-    //used in getRelativeGoalPose
     public static double timeToGoal(double distance) {
         return Interpolator.interpolate(distance, Interpolator.DataType.SHOT_TIME);
     }
@@ -49,19 +35,6 @@ public class ShooterCommands {
     }
 
 
-
-    public static Command getTurnAndDriveCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
-
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
-            () -> -gamepad.getLeftY(),
-            () -> -gamepad.getLeftX(),
-            () -> Math.cos(getTurnAngle(drivebase, gamepad, goalPose)),
-            () -> Math.sin(getTurnAngle(drivebase, gamepad, goalPose))
-        );
-
-        return driveFieldOrientedAnglularVelocity;
-
-    }
 
     public static double getTurnAngle(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
         
@@ -87,8 +60,6 @@ public class ShooterCommands {
 
     public static double getTurnSpeed(SwerveSubsystem drivebase, CommandPS5Controller gamepad, double angle) {
         
-
-
         double desiredAngle = angle;
         double currentAngle = drivebase.getPose().getRotation().getRadians();
         double angleError = MathUtil.angleModulus(desiredAngle - currentAngle);
@@ -96,43 +67,29 @@ public class ShooterCommands {
         return angleError * 1.0;
     }
 
-    
-
-    public static Command getTurnDriveShootWhileAtRestCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
-
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
-            () -> -gamepad.getLeftY(),
-            () -> -gamepad.getLeftX(),
-            () -> getTurnSpeed(drivebase, gamepad, goalPose),
-            OIConstants.kDriveDeadband, OIConstants.kDriveDeadband);
-        
-        ShooterSubsystem shooter = ShooterSubsystem.getInstance();
-        double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-        Command shootCommand = shooter.runOnce(()->{shooter.setSpeed(Constants.ShooterConstants.shootSpeed); shooter.setHood(hoodAngle(distance, true));});
-
-        return driveFieldOrientedAnglularVelocity.alongWith(shootCommand);
-    
+    public enum ShootSpeed {
+        LOW, HIGH, FEED
+    }
+    public static void changeSpeed(ShootSpeed speed, ShooterSubsystem shooter) {
+        if (speed == ShootSpeed.LOW) {
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+        } else if (speed == ShootSpeed.HIGH) {
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+        } else if (speed == ShootSpeed.FEED) {
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.feedSpeed;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+        }
     }
 
 
-
-    public static Command getTurnDriveShootWhileMovingCommand(SwerveSubsystem drivebase, CommandPS5Controller gamepad, Translation2d goalPose) {
-
-        Command driveFieldOrientedAnglularVelocity = drivebase.driveCommand(
-            () -> -gamepad.getLeftY(),
-            () -> -gamepad.getLeftX(),
-            () -> Math.cos(getTurnAngle(drivebase, gamepad, getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose))),
-            () -> Math.sin(getTurnAngle(drivebase, gamepad, getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose)))
-        );
-        
-        ShooterSubsystem shooter = ShooterSubsystem.getInstance();
-        Command shootCommand = new RunCommand(()-> {
-            double distance = drivebase.getPose().getTranslation().getDistance(getRelativeGoalPose(drivebase.getPose(), drivebase.getFieldVelocity(), goalPose));
-            shooter.shootCommand().andThen(shooter.hoodCommand(hoodAngle(distance, true)));
-        }, shooter);
-
-        return new ParallelCommandGroup(driveFieldOrientedAnglularVelocity, shootCommand);
-    }
 
 
 
@@ -140,14 +97,6 @@ public class ShooterCommands {
     public static void toggleAutoTurn() {
         autoTurnEnabled = !autoTurnEnabled;
     }
-
-    // public Command aimHoodCommand(){
-    //     ShooterSubsystem shooter = ShooterSubsystem.getInstance();
-    //     SwerveSubsystem drivebase = drivebase
-    //     Translation2d goalPose = new Translation2d(4.6, 4);
-    //     double distance = drivebase.getPose().getTranslation().getDistance(goalPose);
-    //     return this.runOnce(()->shooter.setHood(hoodAngle(distance)));
-    // }
 
     public static class TurnAndShootCommand extends Command {
 
@@ -170,25 +119,21 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
 
-            
-
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
         }
 
         @Override
         public void initialize() {
-            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             floor.stopFloor();
             transfer.setStop();
 
+            changeSpeed(ShootSpeed.LOW, shooter);
+
             doLoading = false;
             updater = 0;
-
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(11.920, 4.04);
-            else
-                    goalPose = new Translation2d(4.6, 4.04);
+            if (drivebase.isRedAlliance()) goalPose = new Translation2d(11.920, 4.04);
+            else goalPose = new Translation2d(4.6, 4.04);
         }
 
         @Override
@@ -217,15 +162,9 @@ public class ShooterCommands {
 
             double distance = botPose.getTranslation().getDistance(goalPose);
             if (distance < 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
-                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
-                Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
-                Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
-                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+                changeSpeed(ShootSpeed.LOW, shooter);
             } else if (distance > 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
-                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
-                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
-                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
-                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+                changeSpeed(ShootSpeed.HIGH, shooter);
             }
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
@@ -252,6 +191,10 @@ public class ShooterCommands {
         }
     }
 
+
+
+
+
     public static class FullFeedCommand extends Command {
 
         FloorSubsystem floor;
@@ -269,7 +212,6 @@ public class ShooterCommands {
             shooter = ShooterSubsystem.getInstance();
             drivebase = p_drivebase;
             gamepad = p_gamepad;
-
             
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
@@ -277,15 +219,12 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
-            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             floor.stopFloor();
             transfer.setStop();
 
             doLoading = false;
 
-            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
-            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
-            shooter.setSpeed(Constants.ShooterConstants.feedSpeed);
+            changeSpeed(ShootSpeed.FEED, shooter);
             shooter.setHood(0.7);
         }
 
@@ -333,7 +272,6 @@ public class ShooterCommands {
 
 
 
-
     public static class TurnAndShootInAutoCommand extends Command {
 
         FloorSubsystem floor;
@@ -352,10 +290,8 @@ public class ShooterCommands {
             shooter = ShooterSubsystem.getInstance();
             drivebase = p_drivebase;
             
-            if (drivebase.isRedAlliance())
-                    goalPose = new Translation2d(11.920, 4.04);
-            else
-                    goalPose = new Translation2d(4.6, 4);
+            if (drivebase.isRedAlliance()) goalPose = new Translation2d(11.920, 4.04);
+            else goalPose = new Translation2d(4.6, 4);
 
             addRequirements(floor, transfer, shooter, drivebase);
             doLoading = false;
@@ -363,9 +299,10 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
-            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             floor.stopFloor();
             transfer.setStop();
+
+            changeSpeed(ShootSpeed.LOW, shooter);
 
             doLoading = false;
         }
@@ -383,14 +320,8 @@ public class ShooterCommands {
                                 true,
                                 true
             );
-            
-            
 
             double distance = botPose.getTranslation().getDistance(goalPose);
-            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
-            Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
-            Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
-            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
             if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
@@ -450,7 +381,6 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
-            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
             floor.stopFloor();
             transfer.setStop();
 
@@ -463,19 +393,11 @@ public class ShooterCommands {
 
             botPose = drivebase.getPose();
 
-            //double angRot = getTurnSpeed(drivebase, null, goalPose);
-
             double distance = botPose.getTranslation().getDistance(goalPose);
             if (autoTurnEnabled && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
-                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConst;
-                Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
-                Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
-                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+                changeSpeed(ShootSpeed.HIGH, shooter);
             } else if (!autoTurnEnabled && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
-                Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.shootSpeedConstLow;
-                Constants.ShooterConstants.fl = Constants.ShooterConstants.flLow;
-                Constants.ShooterConstants.fr = Constants.ShooterConstants.frLow;
-                shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+                changeSpeed(ShootSpeed.LOW, shooter);
             }
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
@@ -502,5 +424,4 @@ public class ShooterCommands {
             return false;
         }
     }
-
 }

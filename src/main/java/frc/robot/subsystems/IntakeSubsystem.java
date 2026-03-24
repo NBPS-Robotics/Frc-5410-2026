@@ -28,20 +28,21 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class IntakeSubsystem extends SubsystemBase{
 
-    private SparkMax motor = new SparkMax(Constants.IntakeConstants.canID, MotorType.kBrushless);
-    private SparkMax motor2 = new SparkMax(Constants.IntakeConstants.canID2, MotorType.kBrushless);
-    public SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
-    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
-    SparkBaseConfig pivConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
-    SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
-    SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
-    SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(pivConfig).inverted(true);
-    private boolean stow=false;
     private static IntakeSubsystem intakeSingleton;
     public static IntakeSubsystem getInstance() {
         if (intakeSingleton==null) intakeSingleton = new IntakeSubsystem();
         return intakeSingleton;
     }
+
+    private SparkMax motor = new SparkMax(Constants.IntakeConstants.canID, MotorType.kBrushless);
+    private SparkMax motor2 = new SparkMax(Constants.IntakeConstants.canID2, MotorType.kBrushless);
+    public SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
+
+    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(40, 40);
+    SparkBaseConfig pivConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(20, 20);
+    SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
+    SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);
+    SparkBaseConfig pivotConfig = new SparkMaxConfig().apply(pivConfig).inverted(true);
 
     @SuppressWarnings({"removal"})
     public IntakeSubsystem() {
@@ -51,12 +52,13 @@ public class IntakeSubsystem extends SubsystemBase{
                                     .iZone(IntakeConstants.iZone)
                                     .maxMotion.allowedClosedLoopError(IntakeConstants.tolerance);
 
-        //for (int i = 0; i<=5; i++) {
+        for (int i = 0; i<=5; i++) {
             motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             motor2.configure(motor2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        //}
+        }
     }
+
 
 
     public void zero() {//
@@ -78,9 +80,10 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
      public void stow() {
-        stow=true;
         pivot.getClosedLoopController().setSetpoint(IntakeConstants.stow, ControlType.kPosition);
     }
+
+
 
     public boolean getAtPosistion(){
         return Math.abs(pivot.getClosedLoopController().getSetpoint()-pivot.getEncoder().getPosition())<1;
@@ -92,6 +95,8 @@ public class IntakeSubsystem extends SubsystemBase{
     public Trigger atDeploy(){
         return new Trigger(()->(getAtPosistion()&&pivot.getClosedLoopController().getSetpoint()==IntakeConstants.deploy));
     }
+
+
 
     public void doIntake() {
         motor.set(-1);
@@ -107,6 +112,8 @@ public class IntakeSubsystem extends SubsystemBase{
         motor.set(0.0);
         motor2.set(0.0);
     }
+
+
 
     @Override
     public void periodic() {
@@ -159,6 +166,8 @@ public class IntakeSubsystem extends SubsystemBase{
             );
         }
     }
+
+
 
     private boolean slowEnabled = true;
     public void toggleSlowEnabled() {

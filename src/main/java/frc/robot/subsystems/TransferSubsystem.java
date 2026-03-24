@@ -12,20 +12,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class TransferSubsystem extends SubsystemBase{
 
-   // private final SparkMax leftTransfer = new SparkMax(Constants.TransferConstants.LCanId, MotorType.kBrushless);
-    private final SparkMax rightTransfer = new SparkMax(Constants.TransferConstants.RCanId, MotorType.kBrushless);
-
-    private final PIDController transferPid=new PIDController(Constants.TransferConstants.p, Constants.TransferConstants.i, Constants.TransferConstants.d);
-
-    private final SparkBaseConfig rightConfig;
-    //private final SparkBaseConfig leftConfig;
-
     private static TransferSubsystem instance;
-
     public static TransferSubsystem getInstance(){
         if (instance == null) {
             instance = new TransferSubsystem();
@@ -33,17 +23,21 @@ public class TransferSubsystem extends SubsystemBase{
         return instance;
     }
 
+    private final SparkMax rightTransfer = new SparkMax(Constants.TransferConstants.RCanId, MotorType.kBrushless);
+
+    private final PIDController transferPid=new PIDController(Constants.TransferConstants.p, Constants.TransferConstants.i, Constants.TransferConstants.d);
+    private final SparkBaseConfig rightConfig;
+
     public TransferSubsystem(){
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40).inverted(true);
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
-        //leftConfig=new SparkMaxConfig().apply(sharedConfig).follow(leftTransfer);
         transferPid.setSetpoint(0);
         for(int i=0; i<=5; i++){
             rightTransfer.configure(rightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-           // leftTransfer.configure(leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
-
     }
+
+
 
     public void setRun(){
         transferPid.setSetpoint(Constants.TransferConstants.motorSpeed);
@@ -70,16 +64,15 @@ public class TransferSubsystem extends SubsystemBase{
         if(transferPid.getSetpoint()==0)rightTransfer.set(0);
     }
 
-    public void telemetry(){
-        SmartDashboard.putNumber("transfer speed",rightTransfer.getEncoder().getVelocity());
-    }
+
 
     @Override
     public void periodic(){
-        telemetry();
+        SmartDashboard.putNumber("transfer speed",rightTransfer.getEncoder().getVelocity());
     }
 
-    //commands
+
+
     public Command runCommand(){
         return this.runOnce(()->setRun());
     }
@@ -89,5 +82,4 @@ public class TransferSubsystem extends SubsystemBase{
     public Command outtakeCommand(){
         return new SequentialCommandGroup(this.runOnce(()->setOuttake()), this.runOnce(()->transferPid.reset()));
     }
-
 }

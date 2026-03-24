@@ -1,19 +1,10 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.Utils;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.RobotContainer;
-import frc.robot.commands.UtilCommands.DriveCommand;
 import frc.utils.LimelightHelpers;
 import frc.utils.LimelightHelpers.PoseEstimate;
 
@@ -37,18 +28,11 @@ public class VisionSubsystem extends SubsystemBase{
     private static final String fLimeName = "limelight-limef";
     private static final String bLimeName = "limelight";
 
-    private static final String fPoseName = "FLpose";
-    private static final String bPoseName = "BLpose";
-
     private boolean ignoreFlLime = false;
     private boolean ignoreBlLime = false;
     private boolean ignoreAllLimes = false;
 
-    private StructPublisher<Pose2d> flNT = NetworkTableInstance.getDefault().getStructTopic("flNT", Pose2d.struct).publish();
-    private StructPublisher<Pose2d> blNT = NetworkTableInstance.getDefault().getStructTopic("blNT", Pose2d.struct).publish();
-
     private LimelightHelpers.PoseEstimate limeF, limeB;
-    private LimelightHelpers.PoseEstimate limeFPrev, limeBPrev;
 
     private Notifier notifier;
 
@@ -125,10 +109,6 @@ public class VisionSubsystem extends SubsystemBase{
         resetOdomAt = -10;
     }
 
-    private boolean doResetOdom() {
-        return resetOdomAt > Timer.getFPGATimestamp();
-    }
-
     /**
      * Starts the Limelight odometry thread
      */
@@ -149,112 +129,14 @@ public class VisionSubsystem extends SubsystemBase{
 
         //updateFrontLime();
         //updateBackLime();
+        //Look back at the github commit history if you want to see the old methods for updating each limelight separately
         updateAllLimes();
     }
 
-    /**
-     * Updates the odometry for the front limelight
-     */
-    private void updateFrontLime() {
-        LimelightHelpers.SetRobotOrientation(
-            fLimeName,
-            swerve.getPose().getRotation().getDegrees(),
-            swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
-            0,
-            0,
-            0,
-            0
-        );
-        limeF = LimelightHelpers.getBotPoseEstimate_wpiBlue(fLimeName);
-
-        if (limeF != null && limeF.pose != null) {
-            SmartDashboard.putString("LimeF pose", limeF.pose.toString());
-            if (doResetOdom()) {
-                swerve.swerveDrive.resetOdometry(limeF.pose);
-                resetOdomAt = -10;
-            }
-
-            ignoreFlLime = !poseInField(limeF.pose) ||
-                (Math.abs(LimelightHelpers.getBotPose3d_wpiBlue(fLimeName).getZ()) > 0.4) ||
-                (LimelightHelpers.getTA(fLimeName) < 0.1) ||
-                (limeFPrev != null && (limeF.pose.getTranslation().getDistance(limeFPrev.pose.getTranslation()) /
-                    (limeF.timestampSeconds - limeFPrev.timestampSeconds)) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude()) ||
-                (limeFPrev != null && (limeF.pose.getTranslation()
-                    .getDistance(limeFPrev.pose.getTranslation()) > DriveConstants.MaxErrorFromBot)/*DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)*/) ||
-                (limeF.rawFiducials.length > 0 && limeF.rawFiducials[0].ambiguity > 0.5 &&
-                    limeF.rawFiducials[0].distToCamera > 4.0) ||
-                limeF.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-
-            if (!ignoreAllLimes && !ignoreFlLime) {
-                //SmartDashboard.putBoolean(fPoseName, true);
-                flNT.set(limeF.pose);
-
-                swerve.swerveDrive.addVisionMeasurement(
-                    limeF.pose,
-                    Utils.fpgaToCurrentTime(limeF.timestampSeconds),
-                    VecBuilder.fill(0.5, 0.5, 5).div(LimelightHelpers.getTA(fLimeName))
-                );
-            } else {
-                //SmartDashboard.putBoolean(fPoseName, false);
-            }
-
-            limeFPrev = limeF;
-        }
-    }
-
-    /**
-     * Updates the odometry for the back limelight
-     */
-    private void updateBackLime() {
-        LimelightHelpers.SetRobotOrientation(
-            bLimeName,
-            swerve.getPose().getRotation().getDegrees(),
-            swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
-            0,
-            0,
-            0,
-            0
-        );
-        limeB = LimelightHelpers.getBotPoseEstimate_wpiBlue(bLimeName);
-
-        if (limeB != null && limeB.pose != null) {
-            SmartDashboard.putString("LimeB pose", limeB.pose.toString());
-            if (doResetOdom()) {
-                swerve.swerveDrive.resetOdometry(limeB.pose);
-                resetOdomAt = -10;
-            }
-
-            ignoreBlLime = !poseInField(limeB.pose) ||
-                (Math.abs(LimelightHelpers.getBotPose3d_wpiBlue(bLimeName).getZ()) > 0.4) ||
-                (LimelightHelpers.getTA(bLimeName) < 0.1) ||
-                (limeBPrev != null && (limeB.pose.getTranslation().getDistance(limeBPrev.pose.getTranslation()) /
-                    (limeB.timestampSeconds - limeBPrev.timestampSeconds)) > DriveConstants.kSpeedAt12Volts.baseUnitMagnitude()) ||
-                (limeBPrev != null && (limeB.pose.getTranslation()
-                    .getDistance(limeBPrev.pose.getTranslation()) > DriveConstants.MaxErrorFromBot)/*DriveConstants.kSpeedAt12Volts.baseUnitMagnitude() * 0.02)*/) ||
-                (limeB.rawFiducials.length > 0 && limeB.rawFiducials[0].ambiguity > 0.5 &&
-                    limeB.rawFiducials[0].distToCamera > 4.0) ||
-                limeB.pose.equals(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-
-            if (!ignoreAllLimes && !ignoreBlLime) {
-                //SmartDashboard.putBoolean(bPoseName, true);
-                blNT.set(limeB.pose);
-
-                swerve.swerveDrive.addVisionMeasurement(
-                    limeB.pose,
-                    Utils.fpgaToCurrentTime(limeB.timestampSeconds),
-                    VecBuilder.fill(0.75, 0.75, 5).div(LimelightHelpers.getTA(bLimeName))
-                );
-            } else {
-                //SmartDashboard.putBoolean(bPoseName, false);
-            }
-
-            limeBPrev = limeB;
-        }
-    }
      /**
      * Updates the odometry for the back limelight,using another method
      */
-    private void updateAllLimes() {//new test vision method
+    private void updateAllLimes() {
         double r=swerve.getPose().getRotation().getDegrees();
         LimelightHelpers.SetRobotOrientation(
             bLimeName,
@@ -277,19 +159,19 @@ public class VisionSubsystem extends SubsystemBase{
        
         limeB = LimelightHelpers.getBotPoseEstimate_wpiBlue(bLimeName);
         limeF = LimelightHelpers.getBotPoseEstimate_wpiBlue(fLimeName);
-            if (!ignoreAllLimes) {
-                //SmartDashboard.putBoolean(bPoseName, true);
-                limeB = validatePoseEstimate(limeB);
-                //SmartDashboard.putBoolean(fPoseName, true);
-                limeF = validatePoseEstimate(limeF);//makes sure pose is valid
+        if (!ignoreAllLimes) {
+            limeB = validatePoseEstimate(limeB);
+            limeF = validatePoseEstimate(limeF);
 
-                PoseEstimate bestPose;
-            if (limeF!= null && limeB != null) {
+            PoseEstimate bestPose = null;
+            boolean canUseB = limeB != null && !ignoreBlLime;
+            boolean canUseF = limeF != null && !ignoreFlLime;
+            if (canUseB && canUseF) {
                 bestPose = (limeF.avgTagArea >= limeB.avgTagArea) ? limeF : limeB;
-         } else if (limeF != null) {//tries to get the best pose
-              bestPose = limeF;
-            } else {
-            bestPose = limeB;
+            } else if (canUseF) {
+                bestPose = limeF;
+            } else if (canUseB) {
+                bestPose = limeB;
             }
                 
             if (bestPose != null) {
@@ -310,7 +192,7 @@ public class VisionSubsystem extends SubsystemBase{
      * @param pose The {@link Pose2d} to check
      * @return True if the pose is inside the field dimensions, false otherwise
      */
-    private boolean poseInField(Pose2d pose) {
+    public boolean poseInField(Pose2d pose) {
         return pose.getTranslation().getX() > 0 &&
             pose.getTranslation().getX() < 17.55 &&
             pose.getTranslation().getY() > 0 &&
