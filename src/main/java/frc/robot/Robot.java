@@ -37,9 +37,11 @@ public class Robot extends TimedRobot
     //vision actually updates the odometry, while sensors just update
     //thier respective values
     m_gcTimer.start();
+    SensorSubsystem sensorSubsystem = SensorSubsystem.getInstance();
+    TransferSubsystem transferSubsystem = TransferSubsystem.getInstance();
     addPeriodic(()->{
-      SensorSubsystem.getInstance().updateAll();//all susbsystems that need pid should have the methods that
-      TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+      sensorSubsystem.updateAll();//all susbsystems that need pid should have the methods that
+      transferSubsystem.runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
   }
