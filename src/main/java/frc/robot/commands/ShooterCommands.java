@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -99,7 +100,9 @@ public class ShooterCommands {
     }
 
     public static class TurnAndShootCommand extends Command {
-
+        Timer timer=new Timer();
+        double laststop=0;
+        double unstop=0;
         FloorSubsystem floor;
         TransferSubsystem transfer;
         ShooterSubsystem shooter;
@@ -125,6 +128,8 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
+            laststop=Timer.getFPGATimestamp();
+            unstop=Timer.getFPGATimestamp()-0.1;
             floor.stopFloor();
             transfer.setStop();
 
@@ -172,8 +177,16 @@ public class ShooterCommands {
                 doLoading = true;
             }
             if (doLoading) {
-                floor.doFloorIntake();
+                //floor.doFloorIntake();
                 transfer.setRun();
+            }
+            if(laststop+1<=Timer.getFPGATimestamp()){
+                unstop=Timer.getFPGATimestamp()+1;
+                floor.stopFloor();
+            }
+            if(unstop<=Timer.getFPGATimestamp()){
+                if(doLoading)floor.doFloorIntake();
+                laststop=Timer.getFPGATimestamp();
             }
         }
 
