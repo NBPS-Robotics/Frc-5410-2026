@@ -7,22 +7,24 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.subsystems.SwerveSubsystem;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.commands.ShooterCommands;
 
 public class ShooterSubsystem extends SubsystemBase{
+
+    private static ShooterSubsystem instance;
+    public static ShooterSubsystem getInstance(){
+        if (instance == null) {
+            instance = new ShooterSubsystem();
+        }
+        return instance;
+    }
 
     private final SparkMax rTop = new SparkMax(ShooterConstants.RCanId, MotorType.kBrushless);
     private final SparkMax rBottom = new SparkMax(ShooterConstants.R2CanId, MotorType.kBrushless);
@@ -40,15 +42,6 @@ public class ShooterSubsystem extends SubsystemBase{
     private final SparkBaseConfig right2Config;
     private final SparkBaseConfig leftConfig;
     private final SparkBaseConfig left2Config;
-
-    private static ShooterSubsystem instance;
-
-    public static ShooterSubsystem getInstance(){
-        if (instance == null) {
-            instance = new ShooterSubsystem();
-        }
-        return instance;
-    }
 
     public ShooterSubsystem(){
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
@@ -69,26 +62,9 @@ public class ShooterSubsystem extends SubsystemBase{
             lTop.configure(leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             lBottom.configure(left2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
-
         setHood(0.49);
     }
 
-    public void setIncreasePR(){
-        ShooterConstants.pr+=0.00001;
-		shooterPidR.setP(ShooterConstants.pr);
-    }
-    public void setDecreasePR(){
-        ShooterConstants.pr-=0.00001;
-		shooterPidR.setP(ShooterConstants.pr);
-    }
-    public void setIncreaseDR(){
-        ShooterConstants.dr+=0.000001;
-        shooterPidR.setD(ShooterConstants.dr);
-    }
-    public void setDecreaseDR(){
-        ShooterConstants.dr-=0.000001;
-        shooterPidR.setD(ShooterConstants.dr);
-    }
 
 
     public void setIncreaseFRHigh(){
@@ -150,12 +126,27 @@ public class ShooterSubsystem extends SubsystemBase{
         hoodServoL.set(0.72);
         }
     }
-    public void changeHood(double increment){
-        setHood(hoodServoR.getPosition()+increment);
-    }
-    public boolean shootMode=false;
 
-    public void telemetry(){
+
+
+    public void runPid(){
+        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.fr)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
+        SmartDashboard.putNumber("rTop Power Set", rTopSet);
+        rTop.set(rTopSet);
+        double lTopSet = (shooterPidL.getSetpoint()*ShooterConstants.fl)+shooterPidL.calculate(lTop.getEncoder().getVelocity());
+        SmartDashboard.putNumber("lTop Power Set", lTopSet);
+        lTop.set(lTopSet);
+
+        if(shooterPidL.getSetpoint()==ShooterConstants.shootSpeed&&lTop.getEncoder().getVelocity()-shooterPidL.getSetpoint()<-70){
+            lTop.set(1);
+        }
+        if(shooterPidR.getSetpoint()==ShooterConstants.shootSpeed&&rTop.getEncoder().getVelocity()-shooterPidR.getSetpoint()<-70){
+            rTop.set(1);
+        }
+    }
+
+    @Override
+    public void periodic(){
       /*
       SmartDashboard.putNumber("pr",shooterPidR.getP());
       SmartDashboard.putNumber("dr",shooterPidR.getD());
@@ -174,12 +165,8 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.updateValues();
     }
 
-    @Override
-    public void periodic(){
-        telemetry();
-    }
 
-    //commands
+
     public Command shootCommand(){
         return this.runOnce(()->setSpeed(ShooterConstants.shootSpeed));
     }
@@ -198,8 +185,4 @@ public class ShooterSubsystem extends SubsystemBase{
     public Command hoodCommand(double val){
         return this.runOnce(()->setHood(val));
     }
-    public Command adjustHoodCommand(double increment){
-        return this.runOnce(()->changeHood(increment));
-    }
-
 }

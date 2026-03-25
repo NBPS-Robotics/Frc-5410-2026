@@ -172,7 +172,6 @@ public class RobotContainer
     //Joysticks (Default) - Drive the robot
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
-    shooter.runPidCommand();
     //shooter.setDefaultCommand(shooter.runPidCommand());
 
     //Options - Zeros the robot heading
@@ -180,15 +179,7 @@ public class RobotContainer
     driverGamepad.options().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
     driverGamepad.R2().whileTrue(new ShooterCommands.JustDoShootCommand(drivebase));
 
-    driverGamepad.povUp().onTrue(shooter.runOnce(()->shooter.setIncreasePR()));
-    driverGamepad.povDown().onTrue(shooter.runOnce(()->shooter.setDecreasePR()));
-    driverGamepad.povRight().onTrue(shooter.runOnce(()->shooter.setIncreaseDR()));
-    driverGamepad.povLeft().onTrue(shooter.runOnce(()->shooter.setDecreaseDR()));
-
-    driverGamepad.triangle().onTrue(shooter.runOnce(()->shooter.setIncreaseFRHigh()));
-    driverGamepad.cross().onTrue(shooter.runOnce(()->shooter.setDecreaseFRHigh()));
-    driverGamepad.circle().onTrue(shooter.runOnce(()->shooter.setIncreaseFRLow()));
-    driverGamepad.square().onTrue(shooter.runOnce(()->shooter.setDecreaseFRLow()));
+   
 
     //driverGamepad.square().onTrue(new InstantCommand(transfer::setRunFull)).onFalse(new InstantCommand(transfer::setStop));
     //driverGamepad.cross().onTrue(new ParallelCommandGroup(new InstantCommand(transfer::setRunFull),floor.intakeCommand())).onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand()));

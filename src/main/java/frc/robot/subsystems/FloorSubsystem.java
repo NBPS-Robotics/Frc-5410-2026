@@ -13,13 +13,13 @@ import frc.robot.Constants;
 
 public class FloorSubsystem extends SubsystemBase{
 
-    private SparkMax motor = new SparkMax(Constants.FloorConstants.canID, MotorType.kBrushless);
-
     private static FloorSubsystem floorSingleton;
     public static FloorSubsystem getInstance() {
         if (floorSingleton==null) floorSingleton = new FloorSubsystem();
         return floorSingleton;
     }
+
+    private SparkMax motor = new SparkMax(Constants.FloorConstants.canID, MotorType.kBrushless);
 
     public FloorSubsystem() {
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).inverted(true).smartCurrentLimit(40, 40);

@@ -4,15 +4,8 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.commands.PathfindingCommand;
-
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoMode;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.ShooterConstants;
@@ -20,7 +13,6 @@ import frc.robot.subsystems.SensorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -45,10 +37,11 @@ public class Robot extends TimedRobot
     //vision actually updates the odometry, while sensors just update
     //thier respective values
     m_gcTimer.start();
+    SensorSubsystem sensorSubsystem = SensorSubsystem.getInstance();
+    TransferSubsystem transferSubsystem = TransferSubsystem.getInstance();
     addPeriodic(()->{
-      SensorSubsystem.getInstance().updateAll();//all susbsystems that need pid should have the methods that
-      TransferSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
-      ShooterSubsystem.getInstance().runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
+      sensorSubsystem.updateAll();//all susbsystems that need pid should have the methods that
+      transferSubsystem.runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
   }
@@ -168,7 +161,6 @@ public class Robot extends TimedRobot
     {
       m_autonomousCommand.cancel();
     }
-    m_robotContainer.setDriveMode();
     m_robotContainer.setMotorBrake(true);
     ShooterSubsystem.getInstance().setIdle();
   }
