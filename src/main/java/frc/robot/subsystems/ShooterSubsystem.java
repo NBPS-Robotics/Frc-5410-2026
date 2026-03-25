@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
@@ -13,7 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase{
@@ -44,15 +44,22 @@ public class ShooterSubsystem extends SubsystemBase{
     private final SparkBaseConfig left2Config;
 
     public ShooterSubsystem(){
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40)
+        .apply(new EncoderConfig().quadratureMeasurementPeriod(16).quadratureAverageDepth(2));
+
+
+
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
         rightConfig.closedLoop.outputRange(-1, 1)
-                                    .pid(0.0012, 0, 0)
-                                    .iZone(IntakeConstants.iZone)
-                                    .feedForward.kV(0.000182);
+                                    .pid(ShooterConstants.pr, ShooterConstants.ir, ShooterConstants.dr)
+                                    .feedForward.kV(ShooterConstants.fr);
                             
         right2Config=new SparkMaxConfig().apply(sharedConfig).follow(rTop);
         leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
+        leftConfig.closedLoop.outputRange(-1, 1)
+                                    .pid(ShooterConstants.pl, ShooterConstants.il, ShooterConstants.dl)
+                                    .feedForward.kV(ShooterConstants.fl);
+
         left2Config=new SparkMaxConfig().apply(sharedConfig).follow(lTop);
         shooterPidR.setSetpoint(0);
         shooterPidL.setSetpoint(0);
@@ -86,7 +93,7 @@ public class ShooterSubsystem extends SubsystemBase{
 
 
     public boolean atSpeed(){
-        return(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120);
+        return(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120)&&(Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<120);
     }
 
    
@@ -129,22 +136,6 @@ public class ShooterSubsystem extends SubsystemBase{
 
 
 
-    public void runPid(){
-        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.fr)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
-        SmartDashboard.putNumber("rTop Power Set", rTopSet);
-        rTop.set(rTopSet);
-        double lTopSet = (shooterPidL.getSetpoint()*ShooterConstants.fl)+shooterPidL.calculate(lTop.getEncoder().getVelocity());
-        SmartDashboard.putNumber("lTop Power Set", lTopSet);
-        lTop.set(lTopSet);
-
-        if(shooterPidL.getSetpoint()==ShooterConstants.shootSpeed&&lTop.getEncoder().getVelocity()-shooterPidL.getSetpoint()<-70){
-            lTop.set(1);
-        }
-        if(shooterPidR.getSetpoint()==ShooterConstants.shootSpeed&&rTop.getEncoder().getVelocity()-shooterPidR.getSetpoint()<-70){
-            rTop.set(1);
-        }
-    }
-
     @Override
     public void periodic(){
       /*
@@ -159,7 +150,6 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
       SmartDashboard.putNumber("Servo Set", hoodServoL.get());
-      SmartDashboard.putBoolean("at speed", shooterPidL.atSetpoint());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
 
       SmartDashboard.updateValues();
