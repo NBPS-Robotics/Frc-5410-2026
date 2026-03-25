@@ -57,8 +57,8 @@ public class IntakeSubsystem extends SubsystemBase{
             motor2.configure(motor2Config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
             pivot.configure(pivotConfig,ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
+        
     }
-
 
 
     public void zero() {//
@@ -167,6 +167,49 @@ public class IntakeSubsystem extends SubsystemBase{
         }
     }
 
+    public Command autoPrepIntakeCommand() {
+        return this.runOnce(()->{
+        deploy();
+        doIntake();
+        ShooterSubsystem.getInstance().setIdleHigh();
+        });
+    }
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private boolean slowEnabled = true;
@@ -231,6 +274,56 @@ public class IntakeSubsystem extends SubsystemBase{
 
         @Override
         public void end(boolean interrupted) {
+            stopIntake();
+        }
+    }
+
+
+
+
+    public class IntakeShakeCommand extends Command {
+
+        SwerveSubsystem drivebase;
+        CommandPS5Controller gamepad;
+        double startTime;
+
+        boolean startedRunning;
+
+        double speed = 0.6;
+        double timeToSlow = 1.0;
+
+        public IntakeShakeCommand() {
+            addRequirements(IntakeSubsystem.getInstance());
+        }
+        
+        @Override
+        public void initialize() {
+            doIntake();
+            deploy();
+            startTime = Timer.getFPGATimestamp();
+            startedRunning = false;
+        }
+
+        @Override
+        public void execute() {
+            double time = Timer.getFPGATimestamp() - startTime;
+            if (time%1.0 > 0.5) {
+                stow();
+            } else {
+                deploy();
+            }
+
+
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            stow();
             stopIntake();
         }
     }
