@@ -115,6 +115,7 @@ public class RobotContainer
     driverGamepad.L2().onFalse(intake.stopCommand());
     driverGamepad.cross().onTrue(intake.zeroCommand());
     driverGamepad.povUp().onTrue(new InstantCommand(()->intake.toggleSlowEnabled()));
+    driverGamepad.povLeft().whileTrue(intake.new IntakeShakeCommand());
 
     driverGamepad.L1().onTrue(new SequentialCommandGroup( //L1 - Stow the intake
       intake.stowCommand(),
