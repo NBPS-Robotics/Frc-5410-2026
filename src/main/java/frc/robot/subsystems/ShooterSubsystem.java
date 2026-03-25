@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ShooterCommands;
 
@@ -51,6 +53,11 @@ public class ShooterSubsystem extends SubsystemBase{
     public ShooterSubsystem(){
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
+        rightConfig.closedLoop.outputRange(-1, 1)
+                                    .pid(0.0012, 0, 0)
+                                    .iZone(IntakeConstants.iZone)
+                                    .feedForward.kV(0.000182);
+                            
         right2Config=new SparkMaxConfig().apply(sharedConfig).follow(rTop);
         leftConfig=new SparkMaxConfig().apply(sharedConfig).inverted(true);
         left2Config=new SparkMaxConfig().apply(sharedConfig).follow(lTop);
@@ -103,70 +110,37 @@ public class ShooterSubsystem extends SubsystemBase{
 
 
     public boolean atSpeed(){
-        return (Math.abs(ShooterConstants.shootSpeed-lTop.getEncoder().getVelocity())<120)&&(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120);
+        return(Math.abs(ShooterConstants.shootSpeed-rTop.getEncoder().getVelocity())<120);
     }
 
-    public void addI(){
-        shooterPidL.reset();
-        shooterPidR.reset();
-        shooterPidL.setI(0.000001);
-        shooterPidR.setI(0.000001);
-    }
+   
     
     public void setSpeed(double speed){
-        shooterPidR.setSetpoint(speed);
-        shooterPidL.setSetpoint(speed);
-        shooterPidR.setP(ShooterConstants.pr);
-        shooterPidL.setP(ShooterConstants.pl);
+        lTop.getClosedLoopController().setSetpoint(speed,ControlType.kVelocity);
+        rTop.getClosedLoopController().setSetpoint(speed,ControlType.kVelocity);
         //addI();
     }
 
     public void setStop(){
-        shooterPidR.setSetpoint(0);
-        shooterPidL.setSetpoint(0);
+        rTop.getClosedLoopController().setSetpoint(0,ControlType.kVelocity);
+        lTop.getClosedLoopController().setSetpoint(0,ControlType.kVelocity);
     }
     public void setIdle(){
-        shooterPidR.setSetpoint(ShooterConstants.idleSpeed);
-        shooterPidL.setSetpoint(ShooterConstants.idleSpeed);
-        shooterPidR.setP(0.00002);
-        shooterPidL.setP(0.00002);
-        shooterPidL.setI(0.00);
-        shooterPidR.setI(0.00);
+        lTop.getClosedLoopController().setSetpoint(ShooterConstants.idleSpeed,ControlType.kVelocity);
+        rTop.getClosedLoopController().setSetpoint(ShooterConstants.idleSpeed,ControlType.kVelocity);
     }
     public void setIdleHigh(){
-        shooterPidR.setSetpoint(ShooterConstants.idleSpeed*2.5);
-        shooterPidL.setSetpoint(ShooterConstants.idleSpeed*2.5);
-        shooterPidR.setP(0.00004);
-        shooterPidL.setP(0.00004);
-        shooterPidL.setI(0.00);
-        shooterPidR.setI(0.00);
+        lTop.getClosedLoopController().setSetpoint(ShooterConstants.idleSpeed*2.5,ControlType.kVelocity);
+        rTop.getClosedLoopController().setSetpoint(ShooterConstants.idleSpeed*2.5,ControlType.kVelocity);
     }
 
     public void setFeed(){
-        shooterPidR.setSetpoint(-ShooterConstants.feedSpeed);
-        shooterPidL.setSetpoint(-ShooterConstants.feedSpeed);
+        lTop.getClosedLoopController().setSetpoint(ShooterConstants.feedSpeed,ControlType.kVelocity);
+        rTop.getClosedLoopController().setSetpoint(ShooterConstants.feedSpeed,ControlType.kVelocity);
     }
 
-    public void runPid(){
-        double rTopSet = (shooterPidR.getSetpoint()*ShooterConstants.fr)+shooterPidR.calculate(rTop.getEncoder().getVelocity());
-        SmartDashboard.putNumber("rTop Power Set", rTopSet);
-        rTop.set(rTopSet);
-        double lTopSet = (shooterPidL.getSetpoint()*ShooterConstants.fl)+shooterPidL.calculate(lTop.getEncoder().getVelocity());
-        SmartDashboard.putNumber("lTop Power Set", lTopSet);
-        lTop.set(lTopSet);
-        if(shooterPidL.getSetpoint()==ShooterConstants.shootSpeed&&lTop.getEncoder().getVelocity()-shooterPidL.getSetpoint()<-70){
-            lTop.set(1);
-            SmartDashboard.putBoolean("gofastL",true);
-        } else SmartDashboard.putBoolean("gofastL",false);
-        if(shooterPidR.getSetpoint()==ShooterConstants.shootSpeed&&rTop.getEncoder().getVelocity()-shooterPidR.getSetpoint()<-70){
-            rTop.set(1);
-            SmartDashboard.putBoolean("gofastR",true);
-        }else SmartDashboard.putBoolean("gofastR",false);
-    }
 
-    public Command runPidCommand(){
-        return new InstantCommand(()->runPid(),this);
-    }
+
     public void setHood(double val){
         if(val<=0.7){
         hoodServoR.set(val);
@@ -196,7 +170,7 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("Servo Set", hoodServoL.get());
       SmartDashboard.putBoolean("at speed", shooterPidL.atSetpoint());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
-      runPid();
+
       SmartDashboard.updateValues();
     }
 
