@@ -16,32 +16,66 @@ public class Interpolator {
         return failed;
     }
 
-    private static final TreeMap<Double, Double> hoodValues = new TreeMap<>();
-    private static final TreeMap<Double, Double> hoodCloseValues = new TreeMap<>();
-    private static final TreeMap<Double, Double> shotTimeValues = new TreeMap<>();
+    private static final HashMap<Double, Double> hoodValues = new HashMap<>();
+    private static final HashMap<Double, Double> hoodCloseValues = new HashMap<>();
+    private static final HashMap<Double, Double> shotTimeValues = new HashMap<>();
+    public Interpolator() {
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+        hoodValues.put(0.0, 0.0);
+
+
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+        hoodCloseValues.put(0.0,0.0);
+
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        shotTimeValues.put(0.0, 0.0);
+        
+
+    }
 
     // Load both files using File objects
-    public static void loadFiles(File hoodFile, File hoodCloseFile, File shotTimeFile) throws IOException {
-        loadIntoMap(hoodFile, hoodValues);
-        loadIntoMap(hoodCloseFile, hoodCloseValues);
-        loadIntoMap(shotTimeFile, shotTimeValues);
-    }
 
-    private static void loadIntoMap(File file, TreeMap<Double, Double> map) throws IOException {
-        for (String line : Files.readAllLines(file.toPath())) {
-            if (line.isBlank()) continue;
-            String[] p = line.trim().split("\\s+");
-            map.put(Double.parseDouble(p[0]), Double.parseDouble(p[1]));
-        }
-    }
+
 
     public static double interpolate(double x, DataType type) {
-        TreeMap<Double, Double> values = (type == DataType.HOOD) ? hoodValues : ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
+        HashMap<Double, Double> values = (type == DataType.HOOD) ? hoodValues : ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
 
         if (values.containsKey(x)) return values.get(x);
-
-        Double lower = values.floorKey(x);
-        Double upper = values.ceilingKey(x);
+        Double lower = 0.0;
+        Double upper = 0.0;
+        Double a = -1.0;
+        for (Double key : values.keySet().stream().sorted().toList()) {
+            if (a==-1.0) {a=key;}
+            if (key < x) {
+                upper = values.get(a);
+                lower = values.get(key);
+                break;
+            }
+        }
 
         if (lower != null && upper != null) {
             return linear(x, lower, values.get(lower), upper, values.get(upper));
