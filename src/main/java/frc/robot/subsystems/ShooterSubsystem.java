@@ -149,7 +149,7 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("r speed",rTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
-      SmartDashboard.putNumber("Servo Set", hoodServoL.get());
+      SmartDashboard.putNumber("Servo Set", hoodServoR.get());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
 
       SmartDashboard.updateValues();
@@ -175,4 +175,8 @@ public class ShooterSubsystem extends SubsystemBase{
     public Command hoodCommand(double val){
         return this.runOnce(()->setHood(val));
     }
+    public Command hoodAdjustCommand(double val){
+        return this.runOnce(()->setHood(hoodServoR.get()+val));
+    }
+    
 }

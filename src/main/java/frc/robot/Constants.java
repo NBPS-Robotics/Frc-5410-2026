@@ -101,15 +101,15 @@ public final class Constants {
     public static double pr=0.00145;
     public static final double ir=0.00000;
     public static double dr=0.00000;//
-    public static double frLow = 0.000183;
-    public static double frHigh = 0.000183;
+    public static double frLow = 0.000187;
+    public static double frHigh = 0.000187;
     public static double fr = frLow;
 
     public static double pl=0.00141;
     public static final double il=0.00000;
     public static final double dl=0.00000;//
-    public static final double flLow = 0.000196;
-    public static final double flHigh = 0.000196;
+    public static final double flLow = 0.000192;
+    public static final double flHigh = 0.000192;
     public static double fl = flLow;
 
     public static final int feedSpeed = 1600;
@@ -140,7 +140,7 @@ public final class Constants {
     public static final double tolerance=0;
 
     public static final double deploy=17.8;
-    public static final double stow=2;
+    public static final double stow=4;
 
     public static final double iZone=0;
 

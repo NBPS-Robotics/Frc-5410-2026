@@ -86,18 +86,6 @@ public class RobotContainer
     //configureBindingsPanel(); // testing code
     configureBindingsCOMPETITION(); // testing code
 
-    // Load interpolator files (if present)
-    try {
-      Interpolator.loadFiles(
-        new File(Filesystem.getDeployDirectory(), "HoodData.txt"),
-        new File(Filesystem.getDeployDirectory(), "HoodDataClose.txt"),
-        new File(Filesystem.getDeployDirectory(), "ShootTimeData.txt")
-      );
-    } catch (IOException e) {
-      e.printStackTrace();
-      Interpolator.failed();
-    }
-
     setAutoCommands();
     SmartDashboard.putData("Autos", autoChooser);
   }
@@ -114,14 +102,13 @@ public class RobotContainer
     driverGamepad.L2().onTrue(intake.defer(()->intake.smartIntakeCommand())); //L2 - Deploy intake and start intaking
     driverGamepad.L2().onFalse(intake.stopCommand());
     driverGamepad.cross().onTrue(intake.zeroCommand());
-    driverGamepad.povUp().onTrue(new InstantCommand(()->intake.toggleSlowEnabled()));
-    driverGamepad.povLeft().whileTrue(intake.new IntakeShakeCommand());
+    //driverGamepad.povLeft().whileTrue(intake.new IntakeShakeCommand());
 
     driverGamepad.L1().onTrue(new SequentialCommandGroup( //L1 - Stow the intake
       intake.stowCommand(),
       intake.intakeCommand()
     )).onFalse(intake.stopCommand());
-    driverGamepad.povDown().onTrue(new SequentialCommandGroup(intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand())).onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
+    driverGamepad.povLeft().onTrue(new SequentialCommandGroup(intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand())).onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
 
     // driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
     // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
@@ -129,6 +116,9 @@ public class RobotContainer
     driverGamepad.R2().whileTrue(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad));
     driverGamepad.R1().whileTrue(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad));
     driverGamepad.triangle().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
+
+    //driverGamepad.povUp().onTrue(shooter.hoodAdjustCommand(0.0025));
+    //driverGamepad.povDown().onTrue(shooter.hoodAdjustCommand(-0.0025));
 
 
     // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));

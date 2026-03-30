@@ -32,7 +32,7 @@ public class ShooterCommands {
     }
 
     public static double hoodAngle(double distance, boolean normalSpeed) {
-        return normalSpeed ? 0.02607*distance + 0.46286 : 0.02607*distance + 0.46286;
+        return normalSpeed ? Interpolator.interpolate(distance, Interpolator.DataType.HOOD) : Interpolator.interpolate(distance, Interpolator.DataType.HOOD_CLOSE);
     }
 
 
@@ -100,9 +100,6 @@ public class ShooterCommands {
     }
 
     public static class TurnAndShootCommand extends Command {
-        Timer timer=new Timer();
-        double laststop=0;
-        double unstop=0;
         FloorSubsystem floor;
         TransferSubsystem transfer;
         ShooterSubsystem shooter;
@@ -114,6 +111,7 @@ public class ShooterCommands {
         Translation2d goalPose = new Translation2d(11.920, 4.04);
 
         int updater = 0;
+        double startTime;
         
         public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -128,8 +126,8 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
-            laststop=Timer.getFPGATimestamp();
-            unstop=Timer.getFPGATimestamp()-0.1;
+            startTime = 0;
+
             floor.stopFloor();
             transfer.setStop();
 
@@ -166,27 +164,21 @@ public class ShooterCommands {
             );
 
             double distance = botPose.getTranslation().getDistance(goalPose);
-            if (distance < 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
+            if (distance < 2.975 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConstLow) {
                 changeSpeed(ShootSpeed.LOW, shooter);
-            } else if (distance > 2.4 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
+            } else if (distance > 3.025 && Constants.ShooterConstants.shootSpeed != Constants.ShooterConstants.shootSpeedConst) {
                 changeSpeed(ShootSpeed.HIGH, shooter);
             }
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
+            SmartDashboard.putNumber("hoodAngle return", hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
-            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
-                doLoading = true;
+            if (startTime == 0 && Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                startTime = Timer.getFPGATimestamp();
             }
+            if (!doLoading && startTime != 0 && Timer.getFPGATimestamp()-startTime>0.25) doLoading = true;
             if (doLoading) {
-                //floor.doFloorIntake();
+                floor.doFloorIntake();
                 transfer.setRun();
-            }
-            if(laststop+1<=Timer.getFPGATimestamp()){
-                unstop=Timer.getFPGATimestamp()+1;
-                floor.stopFloor();
-            }
-            if(unstop<=Timer.getFPGATimestamp()){
-                if(doLoading)floor.doFloorIntake();
-                laststop=Timer.getFPGATimestamp();
             }
         }
 

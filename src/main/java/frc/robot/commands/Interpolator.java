@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import java.io.*;
-import java.nio.file.*;
 import java.util.*;
 
 public class Interpolator {
@@ -16,33 +14,25 @@ public class Interpolator {
         return failed;
     }
 
-    private static final HashMap<Double, Double> hoodValues = new HashMap<>();
+    //private static final HashMap<Double, Double> hoodValues = new HashMap<>();
     private static final HashMap<Double, Double> hoodCloseValues = new HashMap<>();
     private static final HashMap<Double, Double> shotTimeValues = new HashMap<>();
     public Interpolator() {
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
-        hoodValues.put(0.0, 0.0);
+        /*hoodValues.put(1.635, 0.51);
+        hoodValues.put(2.13,0.525);
+        hoodValues.put(2.49,0.535);
+        hoodValues.put(3.04,0.545);
+        hoodValues.put(3.56,0.56);
+        hoodValues.put(4.04,0.575);*/
 
 
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
-        hoodCloseValues.put(0.0,0.0);
 
+        hoodCloseValues.put(1.22, 0.49);
+        hoodCloseValues.put(1.74,0.51);
+        hoodCloseValues.put(2.16,0.525);
+        hoodCloseValues.put(2.51,0.535);
+        hoodCloseValues.put(2.75,0.545);
+        
         shotTimeValues.put(0.0, 0.0);
         shotTimeValues.put(0.0, 0.0);
         shotTimeValues.put(0.0, 0.0);
@@ -62,17 +52,19 @@ public class Interpolator {
 
 
     public static double interpolate(double x, DataType type) {
-        HashMap<Double, Double> values = (type == DataType.HOOD) ? hoodValues : ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
+        if (type==DataType.HOOD) {return (0.0184378*(x*x)) - (0.109559*x) + 0.692893;}
+        if (type==DataType.HOOD_CLOSE) {return (.0353235*x)+.447668;};
+        HashMap<Double, Double> values = ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
 
         if (values.containsKey(x)) return values.get(x);
-        Double lower = 0.0;
-        Double upper = 0.0;
+        Double lower = null;
+        Double upper = null;
         Double a = -1.0;
         for (Double key : values.keySet().stream().sorted().toList()) {
-            if (a==-1.0) {a=key;}
-            if (key < x) {
-                upper = values.get(a);
-                lower = values.get(key);
+            if (a.equals(-1.0)) {a=key;}
+            if (key > x) {
+                upper = key;
+                lower = a;
                 break;
             }
         }
