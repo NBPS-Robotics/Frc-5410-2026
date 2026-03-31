@@ -61,10 +61,7 @@ public class VisionSubsystem extends SubsystemBase{
             LimelightHelpers.setStreamMode_PiPSecondary(limelightName);
         }
     }
-    @Override
-    public void periodic(){
-        loop();
-    }
+
     /**
      * Sets the pipeline of the limelight
      *
@@ -99,7 +96,7 @@ public class VisionSubsystem extends SubsystemBase{
      * <p>Times out if no vision scan occurs within 0.4 seconds of call.</p>
      */
     public void resetOdometry() {
-        resetOdomAt = Timer.getFPGATimestamp() + 0.4;
+        resetOdomAt = Timer.getFPGATimestamp() + 0.2;
     }
 
     /**
@@ -137,10 +134,10 @@ public class VisionSubsystem extends SubsystemBase{
      * Updates the odometry for the back limelight,using another method
      */
     private void updateAllLimes() {
-        double r=swerve.getPose().getRotation().getDegrees();
+        double ang=swerve.getPose().getRotation().getDegrees();
         LimelightHelpers.SetRobotOrientation(
             bLimeName,
-            r,
+            ang,
             swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
             0,
             0,
@@ -149,7 +146,7 @@ public class VisionSubsystem extends SubsystemBase{
         );
         LimelightHelpers.SetRobotOrientation(
             fLimeName,
-            r,
+            ang,
             swerve.pigeon.getAngularVelocityZWorld().getValueAsDouble(),
             0,
             0,
@@ -203,7 +200,7 @@ public class VisionSubsystem extends SubsystemBase{
         if (poseEstimate == null) return null;
             
             double tagMin = 1;
-            double tagMax = 5;
+            double tagMax = 9;
             double minArea = 0.08;
             if (poseEstimate.tagCount == 1) minArea = 0.18;
             if (poseEstimate.tagCount > tagMax || poseEstimate.tagCount < tagMin) return null;
