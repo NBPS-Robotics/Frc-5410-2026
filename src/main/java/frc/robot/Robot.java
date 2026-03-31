@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.SensorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -37,10 +36,8 @@ public class Robot extends TimedRobot
     //vision actually updates the odometry, while sensors just update
     //thier respective values
     m_gcTimer.start();
-    SensorSubsystem sensorSubsystem = SensorSubsystem.getInstance();
     TransferSubsystem transferSubsystem = TransferSubsystem.getInstance();
     addPeriodic(()->{
-      sensorSubsystem.updateAll();//all susbsystems that need pid should have the methods that
       transferSubsystem.runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
@@ -84,9 +81,6 @@ public class Robot extends TimedRobot
   @Override
   public void robotPeriodic()
   {
-    if (m_gcTimer.advanceIfElapsed(5)) {
-      System.gc();
-    }
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
