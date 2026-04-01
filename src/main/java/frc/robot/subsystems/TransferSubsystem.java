@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -11,6 +12,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.TransferConstants;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class TransferSubsystem extends SubsystemBase{
@@ -31,38 +34,37 @@ public class TransferSubsystem extends SubsystemBase{
     public TransferSubsystem(){
         SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40).inverted(true);
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
-        transferPid.setSetpoint(0);
+        rightConfig.closedLoop.outputRange(-1, 1)
+                                    .pid(TransferConstants.p, TransferConstants.i, TransferConstants.d)
+                                    .feedForward.kV(TransferConstants.f);
         for(int i=0; i<=5; i++){
             rightTransfer.configure(rightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         }
+         rightTransfer.getClosedLoopController().setSetpoint(0,SparkBase.ControlType.kVelocity);
     }
 
 
 
     public void setRun(){
-        transferPid.setSetpoint(Constants.TransferConstants.motorSpeed);
+        rightTransfer.getClosedLoopController().setSetpoint(TransferConstants.motorSpeed,SparkBase.ControlType.kVelocity);
     }
 
     public void setRunFull(){
-        rightTransfer.set(1);
+        rightTransfer.getClosedLoopController().setSetpoint(TransferConstants.motorSpeed,SparkBase.ControlType.kVelocity);
     }
     public void setRunFullB(){
-        rightTransfer.set(-1);
+        rightTransfer.getClosedLoopController().setSetpoint(-TransferConstants.motorSpeed,SparkBase.ControlType.kVelocity);
     }
 
     public void setStop(){
-        transferPid.setSetpoint(0);
+        rightTransfer.getClosedLoopController().setSetpoint(0,SparkBase.ControlType.kVelocity);
         rightTransfer.set(0);
     }
 
     public void setOuttake(){
-        transferPid.setSetpoint(-Constants.TransferConstants.motorSpeed);
+        rightTransfer.getClosedLoopController().setSetpoint(-TransferConstants.motorSpeed,SparkBase.ControlType.kVelocity);
     }
 
-    public void runPid(){
-        rightTransfer.set((transferPid.getSetpoint()*Constants.TransferConstants.f)+transferPid.calculate(rightTransfer.getEncoder().getVelocity()));
-        if(transferPid.getSetpoint()==0)rightTransfer.set(0);
-    }
 
 
 
@@ -80,6 +82,6 @@ public class TransferSubsystem extends SubsystemBase{
         return this.runOnce(()->setStop());
     }
     public Command outtakeCommand(){
-        return new SequentialCommandGroup(this.runOnce(()->setOuttake()), this.runOnce(()->transferPid.reset()));
+        return new SequentialCommandGroup(this.runOnce(()->setOuttake()));
     }
 }

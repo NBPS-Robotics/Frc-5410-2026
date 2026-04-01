@@ -84,10 +84,10 @@ public final class Constants {
     public static final int LCanId=10;
     public static final int RCanId=10;
     
-    public static final double p=0.0001;
-    public static final double i=0.0005;
+    public static final double p=0.00009;
+    public static final double i=0.000;
     public static final double d=0.00000;
-    public static final double f=0.000175;
+    public static final double f=0.000183;
 
     public static final int motorSpeed = 4000;
   }

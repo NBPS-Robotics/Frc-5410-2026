@@ -263,7 +263,7 @@ public class SwerveSubsystem extends SubsystemBase
 
     //Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    PathfindingCommand.warmupCommand().schedule();
+    //PathfindingCommand.warmupCommand().schedule();
   }
 
   /**

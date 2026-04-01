@@ -38,7 +38,6 @@ public class Robot extends TimedRobot
     m_gcTimer.start();
     TransferSubsystem transferSubsystem = TransferSubsystem.getInstance();
     addPeriodic(()->{
-      transferSubsystem.runPid();//update pid here to make sure they run as fast as possible, ONLY PID, nothing else
     }, 0.01,0.005);
     instance = this;
   }

@@ -151,8 +151,6 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
       SmartDashboard.putNumber("Servo Set", hoodServoR.get());
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
-
-      SmartDashboard.updateValues();
     }
 
 
