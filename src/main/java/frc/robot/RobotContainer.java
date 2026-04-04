@@ -206,6 +206,7 @@ public class RobotContainer
     autoChooser.addOption("CenterAutoSimple", new PathPlannerAuto("CenterAutoSimple"));
     autoChooser.addOption("TroughFastFar GetTrough", new PathPlannerAuto("FastFarTrough_GetTrough"));
     autoChooser.addOption("TroughFastFar GetCenter", new PathPlannerAuto("FastFarTrough_GetCenter"));
+    autoChooser.addOption("HPFastFar GetCenter", new PathPlannerAuto("FastFarHP_GetCenter"));
   }
 
   public void registerNamedCommands() {//TODO:autos here
