@@ -110,10 +110,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Stow Intake",
-      "waypointRelativePos": 3.0292803970223203,
+      "name": "Deploy Intake",
+      "waypointRelativePos": 0.4969378827646589,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Deploy Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {

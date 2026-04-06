@@ -36,7 +36,7 @@
         "y": 5.97312071683114
       },
       "prevControl": {
-        "x": 1.656578716777713,
+        "x": 1.6565787167777133,
         "y": 5.957765498909104
       },
       "nextControl": {
@@ -68,7 +68,19 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Deploy Intake",
+      "waypointRelativePos": 0.7926509186351658,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Deploy Intake"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

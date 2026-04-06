@@ -53,12 +53,6 @@
                       "data": {
                         "waitTime": 2.5
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Deploy Intake"
-                      }
                     }
                   ]
                 }
@@ -69,7 +63,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "farHPMoreBallsNoDepot"
+            "pathName": "farHPMoreBalls"
           }
         },
         {
@@ -102,12 +96,6 @@
                       "type": "wait",
                       "data": {
                         "waitTime": 2.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Deploy Intake"
                       }
                     }
                   ]

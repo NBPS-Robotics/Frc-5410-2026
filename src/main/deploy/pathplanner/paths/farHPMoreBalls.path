@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 6.146549722228351,
-        "y": 0.1162788905307321
+        "y": 0.11627889053073215
       },
       "nextControl": {
         "x": 6.944403816631373,
@@ -57,7 +57,7 @@
       },
       "nextControl": {
         "x": 5.5404448179809656,
-        "y": 0.2340880124808156
+        "y": 0.23408801248081545
       },
       "isLocked": false,
       "linkedName": null
@@ -110,10 +110,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Stow Intake",
-      "waypointRelativePos": 3.0292803970223203,
+      "name": "Deploy Intake",
+      "waypointRelativePos": 0.4899387576552906,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Deploy Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {
