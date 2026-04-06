@@ -43,7 +43,7 @@ public class TransferSubsystem extends SubsystemBase{
          rightTransfer.getClosedLoopController().setSetpoint(0,SparkBase.ControlType.kVelocity);
     }
 
-
+ 
 
     public void setRun(){
         rightTransfer.getClosedLoopController().setSetpoint(TransferConstants.motorSpeed,SparkBase.ControlType.kVelocity);

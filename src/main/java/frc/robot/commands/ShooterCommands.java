@@ -230,7 +230,7 @@ public class ShooterCommands {
             doLoading = false;
 
             changeSpeed(ShootSpeed.FEED, shooter);
-            shooter.setHood(0.7);
+            shooter.setHood(0.67);
         }
 
         @Override
@@ -240,7 +240,7 @@ public class ShooterCommands {
 
             double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
             double angRot;
-            if(drivebase.isRedAlliance())angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, 0) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
+            if(drivebase.isRedAlliance())angRot = false ? getTurnSpeed(drivebase, gamepad, 0) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
             else angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, Math.PI) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
             drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
                                 transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
