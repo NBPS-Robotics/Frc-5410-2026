@@ -54,6 +54,7 @@ public class Interpolator {
     public static double interpolate(double x, DataType type) {
         if (type==DataType.HOOD) {return (0.0184378*(x*x)) - (0.109559*x) + 0.692893;}
         if (type==DataType.HOOD_CLOSE) {return (.0353235*x)+.447668;};
+        if (type==DataType.SHOT_TIME) {return (x>3) ? 1.4 : 1.1;}
         HashMap<Double, Double> values = ((type==DataType.HOOD_CLOSE ? hoodCloseValues : shotTimeValues));
 
         if (values.containsKey(x)) return values.get(x);
