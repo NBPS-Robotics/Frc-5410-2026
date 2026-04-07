@@ -117,7 +117,7 @@ public class RobotContainer
 
   
   
-  private void configureBindingsShooterTuning()
+  public void configureBindingsShooterTuning()
   {
 
     // DRIVER CONTROLS:
