@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 
 /**
@@ -36,7 +35,6 @@ public class Robot extends TimedRobot
     //vision actually updates the odometry, while sensors just update
     //thier respective values
     m_gcTimer.start();
-    TransferSubsystem transferSubsystem = TransferSubsystem.getInstance();
     addPeriodic(()->{
     }, 0.01,0.005);
     instance = this;

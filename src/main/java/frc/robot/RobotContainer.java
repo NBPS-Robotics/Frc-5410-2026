@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.io.File;
-import java.io.IOException;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -13,7 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -110,26 +107,12 @@ public class RobotContainer
     )).onFalse(intake.stopCommand());
     driverGamepad.povDown().onTrue(new SequentialCommandGroup(intake.outtakeCommand(),transfer.outtakeCommand(),floor.outtakeCommand())).onFalse(new SequentialCommandGroup(intake.stopCommand(),transfer.stopCommand(),floor.stopCommand()));
 
-    // driverGamepad.R2().and(()->shooter.atSpeed()).onTrue(new ParallelCommandGroup(transfer.runCommand(),floor.intakeCommand()));//TODO: shoot code here next, should only shoot when in shoot mode, if in feed mode it should feed, and otherwise stay stowed
-    // driverGamepad.R2().and(()->!shooter.atSpeed()).onTrue(shooter.shootCommand());
-    // driverGamepad.R2().onFalse(new ParallelCommandGroup(transfer.stopCommand(),floor.stopCommand(),shooter.idleCommand()));
+   
     driverGamepad.R2().whileTrue(new ShooterCommands.TurnAndShootCommand(drivebase, driverGamepad));
     driverGamepad.R1().whileTrue(new ShooterCommands.FullFeedCommand(drivebase, driverGamepad));
     driverGamepad.triangle().onTrue(new InstantCommand(()->ShooterCommands.toggleAutoTurn()));
 
-    //driverGamepad.povUp().onTrue(shooter.hoodAdjustCommand(0.0025));
-    //driverGamepad.povDown().onTrue(shooter.hoodAdjustCommand(-0.0025));
-
-
-    // driverGamepad.povUp().and(()->shooter.shootMode()).onTrue(shooter.hoodCommand(0.49));
-    // driverGamepad.povUp().and(()->!shooter.shootMode()).onTrue(shooter.hoodCommand(0.77));//TODO: Toggle feed mode, shooter modes should be a state machine
-    //modes should function as such:
-    //shoot mode: always aim the hood so its ready when r2 is pressed
-    //feed mode: same but for feed aiming
-    //stow mode: keep hood down for protection
-    //on r2 press: if in shoot or feed aim robot yaw for shots and spin up shooter, when both ready shoot
-
-    //also add shoot on the move toggle to the button panel along with overrides we may find we need later
+    
   }
 
   
@@ -209,7 +192,7 @@ public class RobotContainer
     autoChooser.addOption("HPFastFar GetCenter", new PathPlannerAuto("FastFarHP_GetCenter"));
   }
 
-  public void registerNamedCommands() {//TODO:autos here
+  public void registerNamedCommands() {
     NamedCommands.registerCommand("Idle Shooter", shooter.idleHighCommand());
     NamedCommands.registerCommand("Deploy Intake", intake.deployCommand());
     NamedCommands.registerCommand("Start Intake", intake.intakeCommand());
