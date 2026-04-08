@@ -5,33 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Idle Shooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Deploy Intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Start Intake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BottomFirstPass"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BottomFirstPass"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Idle Shooter"
+                }
+              }
+            ]
           }
         },
         {
