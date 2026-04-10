@@ -39,19 +39,26 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 2.5
+                        "waitTime": 1.5
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "Stow Intake"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.5
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shake"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 3.5
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
