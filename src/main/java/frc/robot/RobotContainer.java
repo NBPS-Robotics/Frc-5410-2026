@@ -100,6 +100,7 @@ public class RobotContainer
     driverGamepad.L2().onFalse(intake.stopCommand());
     driverGamepad.cross().onTrue(intake.zeroCommand());
     driverGamepad.povLeft().whileTrue(intake.new IntakeShakeCommand());
+    driverGamepad.povRight().whileTrue(new InstantCommand(drivebase::lock));
 
     driverGamepad.L1().onTrue(new SequentialCommandGroup( //L1 - Stow the intake
       intake.stowCommand(),
@@ -197,6 +198,7 @@ public class RobotContainer
     NamedCommands.registerCommand("Deploy Intake", intake.deployCommand());
     NamedCommands.registerCommand("Start Intake", intake.intakeCommand());
     NamedCommands.registerCommand("Stow Intake", intake.stowCommand());
+    NamedCommands.registerCommand("Shake", intake.new IntakeShakeCommand());
     NamedCommands.registerCommand("Turn And Shoot", new ShooterCommands.TurnAndShootInAutoCommand(drivebase));
   }
 
