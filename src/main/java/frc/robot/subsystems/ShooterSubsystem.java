@@ -44,7 +44,7 @@ public class ShooterSubsystem extends SubsystemBase{
     private final SparkBaseConfig left2Config;
 
     public ShooterSubsystem(){
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40)
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(35, 35)
         .apply(new EncoderConfig().quadratureMeasurementPeriod(16).quadratureAverageDepth(2));
 
 

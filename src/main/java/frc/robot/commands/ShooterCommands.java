@@ -112,6 +112,7 @@ public class ShooterCommands {
 
         int updater = 0;
         double startTime;
+        double beginTime;
         
         public TurnAndShootCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -127,6 +128,7 @@ public class ShooterCommands {
         @Override
         public void initialize() {
             startTime = 0;
+            beginTime = Timer.getFPGATimestamp();
 
             floor.stopFloor();
             transfer.setStop();
@@ -172,8 +174,10 @@ public class ShooterCommands {
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
             SmartDashboard.putNumber("hoodAngle return", hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
+            
             if (startTime == 0 && Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
                 startTime = Timer.getFPGATimestamp();
+                floor.doFloorOuttake();
             }
             if (!doLoading && startTime != 0 && Timer.getFPGATimestamp()-startTime>0.25) doLoading = true;
             if (doLoading) {
@@ -210,6 +214,7 @@ public class ShooterCommands {
         Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
+        double startTime;
         
         public FullFeedCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -228,6 +233,7 @@ public class ShooterCommands {
             transfer.setStop();
 
             doLoading = false;
+            startTime = 0;
 
             changeSpeed(ShootSpeed.FEED, shooter);
             shooter.setHood(0.67);
@@ -250,9 +256,11 @@ public class ShooterCommands {
                                 true
             );
 
-            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
-                doLoading = true;
+            if (startTime == 0 && Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                startTime = Timer.getFPGATimestamp();
+                floor.doFloorOuttake();
             }
+            if (!doLoading && startTime != 0 && Timer.getFPGATimestamp()-startTime>0.25) doLoading = true;
             if (doLoading) {
                 floor.doFloorIntake();
                 transfer.setRun();
@@ -287,6 +295,7 @@ public class ShooterCommands {
         Pose2d botPose=drivebase.getPose();
 
         boolean doLoading;
+        double startTime;
         Translation2d goalPose;
         
         public TurnAndShootInAutoCommand(SwerveSubsystem p_drivebase) {
@@ -304,12 +313,16 @@ public class ShooterCommands {
 
         @Override
         public void initialize() {
+            if (drivebase.isRedAlliance()) goalPose = new Translation2d(11.920, 4.04);
+            else goalPose = new Translation2d(4.6, 4);
+
             floor.stopFloor();
             transfer.setStop();
 
             changeSpeed(ShootSpeed.LOW, shooter);
 
             doLoading = false;
+            startTime = 0;
         }
 
         @Override
@@ -329,9 +342,11 @@ public class ShooterCommands {
             double distance = botPose.getTranslation().getDistance(goalPose);
             shooter.setHood(hoodAngle(distance, Constants.ShooterConstants.shootSpeed!=Constants.ShooterConstants.shootSpeedConstLow));
 
-            if (Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
-                doLoading = true;
+            if (startTime == 0 && Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+                startTime = Timer.getFPGATimestamp();
+                floor.doFloorOuttake();
             }
+            if (!doLoading && startTime != 0 && Timer.getFPGATimestamp()-startTime>0.25) doLoading = true;
             if (doLoading) {
                 floor.doFloorIntake();
                 transfer.setRun();
