@@ -307,7 +307,7 @@ public class IntakeSubsystem extends SubsystemBase{
         @Override
         public void execute() {
             double time = Timer.getFPGATimestamp() - startTime;
-            if (time%1.0 > 0.5) {
+            if (time%1.5 > 0.75) {
                 stow();
             } else {
                 deploy();
