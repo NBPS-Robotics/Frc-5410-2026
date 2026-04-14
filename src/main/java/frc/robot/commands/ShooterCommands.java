@@ -69,7 +69,7 @@ public class ShooterCommands {
     }
 
     public enum ShootSpeed {
-        LOW, HIGH, FEED
+        LOW, HIGH, FEED, FEEDHIGH
     }
     public static void changeSpeed(ShootSpeed speed, ShooterSubsystem shooter) {
         if (speed == ShootSpeed.LOW) {
@@ -84,6 +84,11 @@ public class ShooterCommands {
             shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
         } else if (speed == ShootSpeed.FEED) {
             Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.feedSpeed;
+            Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
+            Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
+            shooter.setSpeed(Constants.ShooterConstants.shootSpeed);
+        } else if (speed == ShootSpeed.FEEDHIGH) {
+            Constants.ShooterConstants.shootSpeed = Constants.ShooterConstants.feedSpeedHigh;
             Constants.ShooterConstants.fl = Constants.ShooterConstants.flHigh;
             Constants.ShooterConstants.fr = Constants.ShooterConstants.frHigh;
             shooter.setSpeed(Constants.ShooterConstants.shootSpeed);

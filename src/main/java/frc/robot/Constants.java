@@ -115,6 +115,7 @@ public final class Constants {
     public static final int feedSpeed = 1500;
     public static final int shootSpeedConst = 1380;//1380
     public static final int shootSpeedConstLow = 1150;
+    public static final int feedSpeedHigh = 1700;
     public static int shootSpeed = shootSpeedConst;
     public static final int idleSpeed = 300;
 
