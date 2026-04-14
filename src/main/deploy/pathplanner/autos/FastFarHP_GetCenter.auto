@@ -37,12 +37,6 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 1.5
-                      }
-                    },
-                    {
                       "type": "race",
                       "data": {
                         "commands": [
@@ -55,7 +49,7 @@
                           {
                             "type": "wait",
                             "data": {
-                              "waitTime": 3.5
+                              "waitTime": 2.5
                             }
                           }
                         ]
@@ -65,6 +59,18 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Deploy Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Intake"
           }
         },
         {
@@ -94,15 +100,22 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "Stow Intake"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.5
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shake"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 10.0
+                            }
+                          }
+                        ]
                       }
                     }
                   ]

@@ -99,6 +99,7 @@ public class RobotContainer
     driverGamepad.L2().onTrue(intake.defer(()->intake.smartIntakeCommand())); //L2 - Deploy intake and start intaking
     driverGamepad.L2().onFalse(intake.stopCommand());
     driverGamepad.cross().onTrue(intake.zeroCommand());
+    driverGamepad.square().onTrue(floor.outtakeCommand()).onFalse(floor.stopCommand());
     driverGamepad.povLeft().whileTrue(intake.new IntakeShakeCommand());
     driverGamepad.povRight().whileTrue(new InstantCommand(drivebase::lock));
 

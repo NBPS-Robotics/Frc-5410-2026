@@ -37,27 +37,40 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "race",
                       "data": {
-                        "waitTime": 2.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Stow Intake"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.5
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 2.5
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shake"
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Deploy Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Start Intake"
           }
         },
         {
