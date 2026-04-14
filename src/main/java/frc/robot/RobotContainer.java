@@ -6,6 +6,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -223,7 +225,34 @@ public class RobotContainer
 
   public void updateSmartDashboard() {
     
-
+    double time = DriverStation.getMatchTime();
+    boolean blueWon = DriverStation.getGameSpecificMessage().equals("B");
+    int bTime;
+    int rTime;
+    if (DriverStation.isAutonomous()) {
+      bTime = 0;
+      rTime = 0;
+    } else if (time > 130) {
+      bTime = (int)(time - 130);
+      rTime = (int)(time - 130);
+    } else if (time > 105) {
+      bTime = blueWon ? (int)(time - 105) : 0;
+      rTime = blueWon ? 0 : (int)(time - 105);
+    } else if (time > 80) {
+      bTime = blueWon ? 0 : (int)(time - 80);
+      rTime = blueWon ? (int)(time - 80) : 0;
+    } else if (time > 55) {
+      bTime = blueWon ? (int)(time - 55) : 0;
+      rTime = blueWon ? 0 : (int)(time - 55);
+    } else if (time > 30) {
+      bTime = blueWon ? 0 : (int)(time - 30);
+      rTime = blueWon ? (int)(time - 30) : 0;
+    } else {
+      bTime = (int)time;
+      rTime = (int)time;
+    }
+    SmartDashboard.putNumber("Blue Shift Time", bTime);
+    SmartDashboard.putNumber("Red Shift Time", rTime);
 
     Pose2d fieldPos = drivebase.getPose();
     SmartDashboard.putNumber("Field X Position", fieldPos.getX());
