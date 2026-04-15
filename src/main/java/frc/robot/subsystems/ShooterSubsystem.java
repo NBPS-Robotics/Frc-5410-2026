@@ -9,6 +9,7 @@ import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -135,6 +136,9 @@ public class ShooterSubsystem extends SubsystemBase{
     }
 
 
+    private int tick = 0;
+    private int count = 0;
+    private double sum = 0;
 
     @Override
     public void periodic(){
@@ -150,6 +154,18 @@ public class ShooterSubsystem extends SubsystemBase{
       SmartDashboard.putNumber("l speed",lTop.getEncoder().getVelocity());
       SmartDashboard.putNumber("POWER",rTop.getAppliedOutput());
       SmartDashboard.putNumber("Servo Set", hoodServoR.get());
+    
+      if (DriverStation.isTeleopEnabled()) {
+        tick++;
+        if (tick%5==0) {
+            double avgCurrent = rTop.getOutputCurrent()+rBottom.getOutputCurrent()+lTop.getOutputCurrent()+lBottom.getOutputCurrent();
+            sum += avgCurrent;
+            SmartDashboard.putNumber("Shooter Current Draw", avgCurrent);
+            count++;
+            SmartDashboard.putNumber("Shooter Average Current", sum/count);
+        }
+      }
+      
       //SmartDashboard.putNumber("Pidput",shooterPidR.calculate(rTop.getEncoder().getVelocity()));
     }
 
