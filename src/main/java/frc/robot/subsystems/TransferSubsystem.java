@@ -28,7 +28,7 @@ public class TransferSubsystem extends SubsystemBase{
     private final SparkBaseConfig rightConfig;
 
     public TransferSubsystem(){
-        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40).inverted(true);
+        SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(30, 30).inverted(true);
         rightConfig=new SparkMaxConfig().apply(sharedConfig).inverted(false);
         rightConfig.closedLoop.outputRange(-1, 1)
                                     .pid(TransferConstants.p, TransferConstants.i, TransferConstants.d)
