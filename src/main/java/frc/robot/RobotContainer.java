@@ -144,7 +144,7 @@ public class RobotContainer
 
 
   public void configureBindingsShootOnTheMoveTest() {
-
+    
     Command driveCommand = OpCommands.getDriveCommand(drivebase, driverGamepad);
     drivebase.setDefaultCommand(driveCommand);
     driverGamepad.options().onTrue(Commands.runOnce(drivebase::zeroGyro));
