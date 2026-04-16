@@ -38,7 +38,7 @@ public class IntakeSubsystem extends SubsystemBase{
     private SparkMax motor2 = new SparkMax(Constants.IntakeConstants.canID2, MotorType.kBrushless);
     public SparkMax pivot = new SparkMax(Constants.IntakeConstants.pivotID, MotorType.kBrushless);
 
-    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(25, 25);
+    SparkBaseConfig sharedConfig = new SparkMaxConfig().apply(Constants.kCoastConfig).smartCurrentLimit(40, 40);
     SparkBaseConfig pivConfig = new SparkMaxConfig().apply(Constants.kBrakeConfig).smartCurrentLimit(30, 30);
     SparkBaseConfig motorConfig = new SparkMaxConfig().apply(sharedConfig);
     SparkBaseConfig motor2Config = new SparkMaxConfig().apply(sharedConfig);

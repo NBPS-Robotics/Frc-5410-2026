@@ -220,6 +220,7 @@ public class ShooterCommands {
 
         boolean doLoading;
         double startTime;
+        boolean isRed;
         
         public FullFeedCommand(SwerveSubsystem p_drivebase, CommandPS5Controller p_gamepad) {
             floor = FloorSubsystem.getInstance();
@@ -228,7 +229,7 @@ public class ShooterCommands {
             drivebase = p_drivebase;
             gamepad = p_gamepad;
             
-            addRequirements(floor, transfer, shooter, drivebase);
+            addRequirements(floor, transfer, shooter);
             doLoading = false;
         }
 
@@ -242,6 +243,8 @@ public class ShooterCommands {
 
             changeSpeed(ShootSpeed.FEED, shooter);
             shooter.setHood(0.67);
+            if (drivebase.isRedAlliance()) isRed = true;
+            else isRed = false;
         }
 
         @Override
@@ -249,19 +252,19 @@ public class ShooterCommands {
 
             botPose = drivebase.getPose();
 
-            double[] transV = SwerveSubsystem.deadband2d(-gamepad.getLeftY(), -gamepad.getLeftX(), Constants.OIConstants.kDriveDeadband);
-            double angRot;
-            if(drivebase.isRedAlliance())angRot = MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
-            else angRot = autoTurnEnabled ? getTurnSpeed(drivebase, gamepad, Math.PI) : MathUtil.applyDeadband(-gamepad.getRightX(), Constants.OIConstants.kDriveDeadband);
-            drivebase.swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                                transV[0] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier,
-                                transV[1] * drivebase.swerveDrive.getMaximumChassisVelocity() * drivebase.driveMultiplier), 0.8),
-                                angRot * drivebase.swerveDrive.getMaximumChassisAngularVelocity() * drivebase.driveMultiplier,
-                                true,
-                                true
-            );
 
-            if (startTime == 0 && Math.abs(angRot) < 0.2 && shooter.atSpeed()) {
+            if (isRed ? botPose.getX() < 4 : botPose.getX() > 12.5) {
+                changeSpeed(ShootSpeed.FEEDHIGH, shooter);
+                shooter.setHood(0.65);
+            } else if (isRed ? botPose.getX() < 8.25 : botPose.getX() > 8.25) {
+                changeSpeed(ShootSpeed.FEED, shooter);
+                shooter.setHood(0.67);
+            } else {
+                changeSpeed(ShootSpeed.HIGH, shooter);
+                shooter.setHood(0.7);
+            }
+
+            if (startTime == 0 && shooter.atSpeed()) {
                 startTime = Timer.getFPGATimestamp();
                 floor.doFloorOuttake();
             }

@@ -41,15 +41,15 @@
                       "data": {
                         "commands": [
                           {
-                            "type": "named",
-                            "data": {
-                              "name": "Shake"
-                            }
-                          },
-                          {
                             "type": "wait",
                             "data": {
                               "waitTime": 2.5
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shake"
                             }
                           }
                         ]
@@ -93,12 +93,6 @@
                 "type": "sequential",
                 "data": {
                   "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.5
-                      }
-                    },
                     {
                       "type": "race",
                       "data": {
